@@ -50,6 +50,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 // Verifica se a inserção foi bem-sucedida
                 if ($stmt->rowCount() > 0) {
+                    // Obtém o ID do usuário recém-criado
+                    $id_usuario = $pdo->lastInsertId();
+
+                    // Insere as preferências de notificações para esse usuário (tudo ativado por padrão)
+                    $queryPreferencias = "INSERT INTO preferencias_notificacoes (id_usuario, notificacao_comentarios_globais, notificacao_curtidas_globais)
+                                          VALUES (:id_usuario, 1, 1)"; // 1 significa que as notificações estão ativadas
+                    $stmtPreferencias = $pdo->prepare($queryPreferencias);
+                    $stmtPreferencias->bindParam(':id_usuario', $id_usuario);
+                    $stmtPreferencias->execute();
+
                     // Gera um token de verificação
                     $token = bin2hex(random_bytes(16));
 
@@ -79,6 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
+
 ?>
 
 <!-- Formulário de cadastro -->
@@ -96,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <!-- Mensagem de erro -->
         <?php if (!empty($erro)): ?> <!-- Verifica se $erro não está vazio -->
-            < p class="erro"><?php echo $erro; ?></p>
+            <p class="erro"><?php echo $erro; ?></p>
         <?php endif; ?>
 
         <form action="" method="post">

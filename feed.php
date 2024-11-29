@@ -7,8 +7,67 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 
-// Incluindo o arquivo de conexão com o banco de dados
+// Incluindo o arquivo de conexão com o banco de dados (PDO)
 include('db.php');
+
+// ID do usuário logado
+$id_usuario = $_SESSION['id_usuario'];  // Supondo que o ID do usuário esteja armazenado na sessão
+
+// Verificar preferências globais de notificações
+$queryGlobais = "SELECT notificacao_comentarios_globais, notificacao_curtidas_globais FROM config_notificacoes WHERE id_usuario = :id_usuario";
+$stmtGlobais = $pdo->prepare($queryGlobais);
+$stmtGlobais->bindParam(':id_usuario', $id_usuario);
+$stmtGlobais->execute();
+$preferenciasGlobais = $stmtGlobais->fetch(PDO::FETCH_ASSOC);
+
+// Verificar se o usuário tem preferências definidas, caso contrário, define como padrão
+if ($preferenciasGlobais === false) {
+    // Se não houver preferências no banco, define valores padrão
+    $preferenciasGlobais = [
+        'notificacao_comentarios_globais' => 1, // Notificação de comentários ativada por padrão
+        'notificacao_curtidas_globais' => 1    // Notificação de curtidas ativada por padrão
+    ];
+}
+
+// Verificar se o usuário quer ser notificado sobre comentários globais
+if ($preferenciasGlobais['notificacao_comentarios_globais']) {
+    // Buscar notificações sobre comentários
+    $queryComentarios = "SELECT * FROM comentarios WHERE id_usuario != :id_usuario";
+    $stmtComentarios = $pdo->prepare($queryComentarios);
+    $stmtComentarios->bindParam(':id_usuario', $id_usuario);
+    $stmtComentarios->execute();
+
+    while ($comentario = $stmtComentarios->fetch(PDO::FETCH_ASSOC)) {
+        // Criar a notificação de comentário
+        $mensagemComentario = "Novo comentário no seu post: {$comentario['texto']}";
+        // Inserir a notificação na tabela de notificações
+        $insertNotificacao = "INSERT INTO notificacoes (id_usuario, tipo, mensagem) VALUES (:id_usuario, 'comentario', :mensagemComentario)";
+        $stmtNotificacao = $pdo->prepare($insertNotificacao);
+        $stmtNotificacao->bindParam(':id_usuario', $id_usuario);
+        $stmtNotificacao->bindParam(':mensagemComentario', $mensagemComentario);
+        $stmtNotificacao->execute();
+    }
+}
+
+// Verificar se o usuário quer ser notificado sobre curtidas globais
+if ($preferenciasGlobais['notificacao_curtidas_globais']) {
+    // Buscar notificações sobre curtidas
+    $queryCurtidas = "SELECT * FROM curtidas WHERE id_usuario != :id_usuario";
+    $stmtCurtidas = $pdo->prepare($queryCurtidas);
+    $stmtCurtidas->bindParam(':id_usuario', $id_usuario);
+    $stmtCurtidas->execute();
+
+    while ($curtida = $stmtCurtidas->fetch(PDO::FETCH_ASSOC)) {
+        // Criar a notificação de curtida
+        $mensagemCurtida = "Alguém curtiu seu post!";
+        // Inserir a notificação na tabela de notificações
+        $insertNotificacao = "INSERT INTO notificacoes (id_usuario, tipo, mensagem) VALUES (:id_usuario, 'curtida', :mensagemCurtida)";
+        $stmtNotificacao = $pdo->prepare($insertNotificacao);
+        $stmtNotificacao->bindParam(':id_usuario', $id_usuario);
+        $stmtNotificacao->bindParam(':mensagemCurtida', $mensagemCurtida);
+        $stmtNotificacao->execute();
+    }
+}
 
 // Lógica para processar o formulário de post
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -33,9 +92,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Obtém a data e hora atuais
     $data_criacao = date('Y-m-d H:i:s');
-
-    // ID do usuário logado
-    $id_usuario = $_SESSION['id_usuario'];  // Supondo que o ID do usuário esteja armazenado na sessão
 
     // Insere o post no banco de dados
     $query = "INSERT INTO publicacoes (id_usuario, texto, imagem, data_criacao) 
@@ -81,14 +137,39 @@ $posts = $stmt->fetchAll();
             <button class="foto-perfil" aria-label="Foto de Perfil" onclick="window.location.href='perfil.php'">
                 <img src="img\cog.png" alt="Foto de Perfil" class="icone">
             </button>
-            <button class="btn-notificacoes" aria-label="Notificações">
-                <img src="img\bell.png" alt="Notificações" class="icone"> <!-- Ícone de notificação (bell.png) -->
+            <button class="btn-notificacoes" aria-label="Notificações" onclick="toggleNotificacoes()">
+            <img src="img\bell.png" alt="Notificações" class="icone">
             </button>
             <button class="btn-deslogar" aria-label="Deslogar" onclick="window.location.href='logout.php'">
                 <img src="img\logout.png" alt="Deslogar" class="icone"> <!-- Ícone de deslogar (logout.png) -->
             </button>
         </div>
     </header>
+
+    <!-- Container para as Notificações -->
+    <div id="notificacoes-container" class="notificacoes-container">
+        <div class="notificacoes-conteudo">
+            <h2>Notificações</h2>
+            <span class="fechar" onclick="toggleNotificacoes()">&times;</span>
+            <div id="lista-notificacoes">
+                <?php 
+                // Código para buscar as notificações
+                $queryNotificacoes = "SELECT * FROM notificacoes WHERE id_usuario = :id_usuario ORDER BY data_criacao DESC";
+                $stmtNotificacoes = $pdo->prepare($queryNotificacoes);
+                $stmtNotificacoes->bindParam(':id_usuario', $id_usuario);
+                $stmtNotificacoes->execute();
+                $notificacoes = $stmtNotificacoes->fetchAll();
+
+                foreach ($notificacoes as $notificacao): ?>
+                    <div class="notificacao-item">
+                        <p><?php echo htmlspecialchars($notificacao['mensagem']); ?></p>
+                        <small><?php echo $notificacao['data_criacao']; ?></small>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Feed de Posts -->
     <main class="main-feed"> 
@@ -122,6 +203,7 @@ $posts = $stmt->fetchAll();
             alert('Abrir comentários para o post ID: ' + id);
         }
     </script>
+    <script src="js\notificacoes.js"></script>
 
 </body>
 </html>
