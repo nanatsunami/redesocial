@@ -1,0 +1,201 @@
+/* Estilos Gerais */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f2f5;
+    box-sizing: border-box;
+}
+
+.container-feed {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    margin-top: 80px; /* Espaço para o header fixo */
+}
+
+/* Estilos do Header */
+.header-fixo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000; /* Fica acima de outros elementos */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+}
+
+.logo .btn-rede-social {
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    padding: 8px 15px;
+    background-color: transparent;
+    border: 2px solid white;
+    border-radius: 5px;
+}
+
+.header-botoes {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Aumentando o espaço entre os botões */
+}
+
+.header-botoes button {
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    width: 40px;   /* Tamanho fixo dos botões */
+    height: 40px;  /* Tamanho fixo dos botões */
+    border-radius: 50%; /* Faz o botão ficar redondo */
+}
+
+/* Foto de perfil */
+.foto-perfil img {
+    width: 100%;  /* A foto ocupa todo o botão */
+    height: 100%;
+    border-radius: 50%;  /* Faz a imagem ser circular */
+    object-fit: cover;  /* Garante que a imagem se ajuste ao círculo */
+}
+
+/* Estilo dos ícones das imagens */
+.icone {
+    width: 24px;  /* Tamanho dos ícones */
+    height: 24px;
+    object-fit: contain; /* Garante que a imagem não distorça */
+}
+
+/* Estilos do Formulário */
+.container-form {
+    margin-bottom: 20px;
+}
+
+.input-textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    resize: none;
+}
+
+.btn-postar {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-postar:hover {
+    background-color: #45a049;
+}
+
+/* Estilos do Feed de Posts */
+.container-posts {
+    margin-top: 20px;
+}
+
+.post {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    padding: 15px;
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #888;
+}
+
+.post-user {
+    font-weight: bold;
+}
+
+.post-content {
+    margin-top: 10px;
+}
+
+.post-content p {
+    margin: 0;
+    font-size: 16px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .container-feed {
+        padding: 15px;
+    }
+    
+    .input-textarea {
+        font-size: 14px;
+    }
+
+    .btn-postar {
+        padding: 8px 12px;
+    }
+
+    .header-fixo {
+        padding: 10px;
+    }
+
+    .header-botoes button {
+        font-size: 18px;
+    }
+
+    .foto-perfil img {
+        width: 25px;
+        height: 25px;
+    }
+
+    .icone {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Estilo do botão de deslogar */
+.btn-deslogar {
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    width: 40px;   /* Tamanho fixo do botão */
+    height: 40px;  /* Tamanho fixo do botão */
+    border-radius: 50%; /* Faz o botão ficar redondo */
+}
+
+/* Estilo do ícone de deslogar */
+.btn-deslogar .icone {
+    width: 24px;  /* Tamanho do ícone */
+    height: 24px;
+    object-fit: contain; /* Garante que a imagem não distorça */
+}
+
+}

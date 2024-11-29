@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed da Rede Social</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Cabeçalho fixo -->
+    <header class="header-fixo">
+        <div class="logo">
+            <a href="#" class="btn-rede-social">Rede Social</a>
+        </div>
+        <div class="header-botoes">
+            <button class="foto-perfil" aria-label="Foto de Perfil">
+                <img src="img\cog.png" alt="Foto de Perfil">
+            </button>
+            <button class="btn-notificacoes" aria-label="Notificações">
+                <img src="img\bell.png" alt="Notificações" class="icone"> <!-- Ícone de notificação (bell.png) -->
+            </button>
+            <button class="btn-logout" aria-label="Logout">
+                <img src="img\logout.png" alt="Sair" class="icone"> <!-- Ícone de deslogar (logout.png) -->
+            </button>
+        </div>
+    </header>
+
+    <!-- Container do Feed -->
+    <div class="container-feed">
+        <div class="container-form">
+            <textarea class="input-textarea" placeholder="O que você está pensando?"></textarea>
+            <button class="btn-postar">Postar</button>
+        </div>
+
+        <!-- Posts do feed -->
+        <div class="container-posts">
+            <div class="post">
+                <div class="post-header">
+                    <span class="post-user">Usuário1</span>
+                    <span class="post-time">2 minutos atrás</span>
+                </div>
+                <div class="post-content">
+                    <p>Texto do post 1</p>
+                </div>
+            </div>
+            <div class="post">
+                <div class="post-header">
+                    <span class="post-user">Usuário2</span>
+                    <span class="post-time">5 minutos atrás</span>
+                </div>
+                <div class="post-content">
+                    <p>Texto do post 2</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
