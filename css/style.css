@@ -1,98 +1,137 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f5f8fa; /* Escolha uma cor de fundo */
+    background-color: #f5f8fa;
     display: flex;
-    justify-content: center;
+    flex-direction: column;  /* Ajuste feito para garantir que a centralização funcione com o layout em coluna */
+    justify-content: flex-start;  /* Isso agora mantém os elementos mais próximos do topo */
     align-items: center;
-    height: 100vh; /* Altura total da tela */
+    min-height: 100vh; /* Garante que o body ocupe 100% da altura da tela */
     margin: 0;
+    padding-top: 60px; /* Ajuste para evitar que o conteúdo seja ocultado pelo cabeçalho fixo */
 }
 
 /* Estilos combinados para containers */
 .container-cadastro, .container-login {
-    background-color: white; 
+    background-color: white;
     padding: 20px;
-    border-radius: 10px; 
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); 
-    text-align: center; 
-    max-width: 400px; 
-    width: 100%; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: stretch; 
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Garantir que os elementos dentro do container fiquem centralizados */
+    margin-bottom: 20px;  /* Adicionado espaçamento entre containers */
 }
 
 h2 {
-    font-size: 24px; 
-    margin-bottom: 20px; 
+    font-size: 24px;
+    margin-bottom: 20px;
 }
 
 input {
-    width: 100%; 
-    padding: 10px; 
-    margin-bottom: 10px; 
-    border: 1px solid #ccc; 
-    border-radius: 5px; 
-    font-size: 16px; 
-    box-sizing: border-box; 
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
 }
 
 .signup, .login {
-    margin-top: 15px; 
+    margin-top: 15px;
 }
 
 .signup a, .login a {
-    color: #1da1f2; 
-    text-decoration: none; 
+    color: #1da1f2;
+    text-decoration: none;
 }
 
 .signup a:hover, .login a:hover {
-    text-decoration: underline; 
+    text-decoration: underline;
 }
 
 .erro {
-    color: red; 
-    margin-bottom: 15px; 
-    background-color: #f8d7da; 
-    border: 1px solid #f5c6cb; 
-    padding: 10px; 
-    border-radius: 5px; 
-    width: 100%; 
-    box-sizing: border-box; 
-    position: relative; 
+    color: red;
+    margin-bottom: 15px;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px 20px;  /* Adiciona mais espaçamento à direita */
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    display: flex;  /* Usando flexbox para alinhar o emoji e o texto */
+    align-items: center;  /* Alinha verticalmente o conteúdo */
 }
 
 .erro::before {
-    content: "⚠️"; 
-    position: absolute;
-    left: 10px; 
-    top: 50%; 
-    transform: translateY(-50%); 
+    content: "⚠️";
+    font-size: 20px;  /* Ajusta o tamanho do emoji */
+    margin-right: 10px;  /* Adiciona um espaço entre o emoji e o texto */
+    flex-shrink: 0;  /* Impede que o emoji encolha */
+}
+
+.erro p {
+    margin: 0;  /* Remove qualquer margem padrão do parágrafo */
+    font-size: 16px;  /* Ajusta o tamanho da fonte do texto */
+    flex-grow: 1;  /* Faz o texto ocupar o restante do espaço */
+}
+
+/* Estilos para mensagens de sucesso */
+.sucesso {
+    color: green;
+    margin: 20px 0;  /* Adiciona uma margem geral para o sucesso */
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 10px 20px;
+    border-radius: 5px;
+    width: 100%;  /* Garante que a largura seja 100% do container pai */
+    box-sizing: border-box;
+    position: relative;
+    display: flex;  /* Usando flexbox para alinhar o emoji e o texto corretamente */
+    align-items: center;  /* Alinha verticalmente o conteúdo */
+}
+
+/* Ajuste de padding e margens para manter espaçamento consistente */
+.sucesso::before {
+    content: "✅";
+    font-size: 20px;  /* Ajusta o tamanho do emoji */
+    margin-right: 10px;  /* Adiciona um espaço entre o emoji e o texto */
+    flex-shrink: 0;  /* Impede que o emoji encolha */
+}
+
+.sucesso p {
+    margin: 0;  /* Remove qualquer margem padrão do parágrafo */
+    font-size: 16px;  /* Ajusta o tamanho da fonte do texto */
+    flex-grow: 1;  /* Faz o texto ocupar o restante do espaço */
 }
 
 .redefine-senha {
-    text-align: left; 
-    font-size: 0. 8em; 
-    margin: 10px 0; 
+    text-align: left;
+    font-size: 0.8em;
+    margin: 10px 0;
 }
 
 .botao-cadastro, .botao-login {
-    background-color: #4CAF50; 
-    color: white; 
-    border: none; 
-    padding: 15px 32px; 
-    text-align: center; 
-    text-decoration: none; 
-    display: inline-block; 
-    font-size: 16px; 
-    margin: 4px 2px; 
-    cursor: pointer; 
-    transition: background-color 0.3s; 
-    border-radius: 10px; 
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 10px;
 }
 
 .botao-cadastro:hover, .botao-login:hover {
-    background-color: #45a049; 
+    background-color: #45a049;
 }
 
 /* Estilos para o cabeçalho fixo */
@@ -104,11 +143,11 @@ input {
     background-color: #333;
     color: white;
     display: flex;
-    justify-content: space-between; 
+    justify-content: space-between;
     align-items: center;
     padding: 10px 20px;
     z-index: 100;
-    box-sizing: border-box; 
+    box-sizing: border-box;
 }
 
 /* Logo */
@@ -122,11 +161,11 @@ input {
 /* Contêiner de botões na header */
 .header-botoes {
     display: flex;
-    justify-content: flex-end; 
-    align-items: center; 
-    gap: 20px; 
-    width: auto; 
-    max-width: 60%; 
+    justify-content: flex-end;
+    align-items: center;
+    gap: 20px;
+    width: auto;
+    max-width: 60%;
 }
 
 /* Botões de ícones */
@@ -134,10 +173,10 @@ input {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 10px; 
+    padding: 10px;
     display: flex;
     align-items: center;
-    flex-grow: 0; 
+    flex-grow: 0;
 }
 
 /* Tamanho dos ícones */
@@ -148,18 +187,21 @@ input {
 
 /* Feed */
 .main-feed {
-    margin-top: 80px; 
+    margin-top: 80px;  /* Ajustado para que o conteúdo não fique oculto atrás do cabeçalho */
     padding: 20px;
     display: flex;
     justify-content: center;
+    width: 100%;
 }
 
 .container-feed {
     width: 100%;
     max-width: 800px;
     background-color: white;
-    padding: 30px; 
+    padding: 30px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding-bottom: 20px; /* Garante que o feed tenha um pouco de espaçamento na parte inferior */
+}
 }
 
 .feed-post-form {
@@ -182,7 +224,7 @@ input {
 
 .feed-posts .feed-post {
     background-color: #fff;
-    margin-bottom: 30px; 
+    margin-bottom: 30px;
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -203,40 +245,40 @@ input {
 }
 
 .interacao-feed button {
-    background-color: #4CAF50; 
-    color: white; 
-    border: none; 
-    padding: 10px 15px; 
-    text-align: center; 
-    text-decoration: none; 
-    display: inline-block; 
-    font-size: 14px; 
-    margin: 4px 2px; 
-    cursor: pointer; 
-    transition: background-color 0.3s; 
-    border-radius: 5px; 
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 4px 2px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 5px;
 }
 
 .interacao-feed button:hover {
-    background-color: #45a049; 
+    background-color: #45a049;
 }
 
 /* Media Queries para Responsividade */
 @media (max-width: 600px) {
     .header-botoes {
-        flex-direction: column; 
-        align-items: flex-start; 
+        flex-direction: column;
+        align-items: flex-start;
     }
 
     .icone {
-        width: 20px; 
+        width: 20px;
         height: 20px;
     }
 
     .feed-post-form textarea {
-        height: 80px; 
+        height: 80px;
     }
-
+}
 
 /* Foto de Perfil no perfil */
 .foto-perfil-container {
@@ -343,53 +385,113 @@ input {
     z-index: -1;
 }
 
-/* Estilo do Container de Notificações (Fica ao lado direito da tela) */
-.notificacoes-container {
-    display: none; /* Inicialmente escondido */
-    position: fixed;
-    top: 60px; /* Distância da header */
-    right: 0;
-    width: 300px; /* Largura do balão de notificações */
-    height: 100vh; /* Ocupa toda a altura da tela */
-    background-color: white;
-    border-left: 1px solid #ccc;
-    box-shadow: -2px 0px 10px rgba(0, 0, 0, 0.1);
-    z-index: 9999; /* Fica acima de outros elementos */
-    overflow-y: auto;
+/* NOTIFICAÇÕES */
+.container-notificacoes {
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.container-notificacoes h2 {
+    text-align: center;
+    color: #333;
+}
+
+.secao-notificacoes, .secao-comentarios, .secao-curtidas, .secao-post {
+    margin-bottom: 20px;
+}
+
+.secao-notificacoes ul, .secao-comentarios ul, .secao-curtidas ul, .secao-post ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.secao-notificacoes li, .secao-comentarios li, .secao-curtidas li, .secao-post li {
     padding: 10px;
-    box-sizing: border-box;
+    background-color: #f4f4f4;
+    margin-bottom: 10px;
+    border-radius: 8px;
 }
 
-.notificacoes-conteudo {
-    position: relative;
-}
-
-.fechar {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 20px;
-    cursor: pointer;
-    color: #333;
-}
-
-.notificacao-item {
-    margin-bottom: 15px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-}
-
-.notificacao-item:last-child {
-    border-bottom: none;
-}
-
-.notificacao-item small {
-    font-size: 12px;
+small {
     color: #888;
+    font-size: 0.8em;
 }
 
-.notificacoes-conteudo h2 {
-    margin-top: 0;
-    font-size: 18px;
+
+/* CONFIGURA_NOTIFICAÇÕES */
+/* Estilo para o contêiner do título e botão de configurações */
+.header-notificacoes {
+    width: 100%;
     color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 20px;
+    box-sizing: border-box;  /* Garantir que o padding não afete o layout */
+}
+
+/* O título h1 dentro da header-notificacoes */
+.header-notificacoes h1 {
+    font-size: 24px;  /* Tamanho de fonte adequado */
+    margin: 0;
+    color: black;  /* Cor do título */
+    text-align: center;  /* Centraliza o título */
+    flex-shrink: 0;  /* Impede que o título encolha */
+}
+
+/* Estilo para o botão de configurações */
+.btn-configuracoes-notif {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;  /* Animação de transição */
+}
+
+/* Para garantir que o título e o botão fiquem alinhados lado a lado, centralizados */
+.header-notificacoes > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;  /* Espaço entre o título e o botão */
+    width: auto;  /* Não faz os itens ocuparem toda a largura */
+}
+
+/* Media Queries para garantir que o layout fique bom em telas menores */
+@media (max-width: 600px) {
+    .header-notificacoes {
+        flex-direction: column;  /* Coloca o título e o botão em coluna em telas menores */
+        align-items: center;  /* Centraliza o conteúdo */
+    }
+
+    .btn-configuracoes-notif {
+        margin-top: 10px;  /* Espaçamento entre o título e o botão */
+    }
+}
+
+/* Estilo para a label contendo o checkbox */
+.checkbox-container {
+    position: relative;  /* Permite o posicionamento absoluto do input */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;  /* Coloca o checkbox à direita */
+    gap: 10px;  /* Espaço entre o checkbox e o texto */
+    margin-bottom: 15px;  /* Espaço entre os itens */
+}
+
+/* Estilo para o checkbox */
+.checkbox-container input {
+    position: absolute;  /* Posiciona o checkbox na frente do texto */
+    left: 0;
+    z-index: 1;  /* Garante que o checkbox fique na frente */
+}
+
+/* Estilo para o texto */
+.checkbox-container span {
+    position: relative;  /* O texto ficará atrás do checkbox */
+    z-index: 0;  /* O texto ficará atrás do checkbox */
 }

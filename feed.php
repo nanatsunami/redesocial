@@ -69,7 +69,6 @@ if ($preferenciasGlobais['notificacao_curtidas_globais']) {
     }
 }
 
-// Lógica para processar o formulário de post
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Obtém o texto do post
     $texto = $_POST['post_text'];
@@ -77,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Lógica para upload da imagem (caso tenha sido enviada)
     $imagem = null;
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-        // Defina o diretório para onde a imagem será salva
+        // Define o diretório para onde a imagem será salva
         $diretorio = 'uploads/';  // Certifique-se de que esse diretório existe e tem permissões adequadas
         $imagem_nome = basename($_FILES['image']['name']);
         $imagem_destino = $diretorio . $imagem_nome;
@@ -86,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (move_uploaded_file($_FILES['image']['tmp_name'], $imagem_destino)) {
             $imagem = $imagem_destino;  // Armazena o caminho da imagem
         } else {
-            echo "Erro ao fazer upload da imagem.";
+            $mensagem_erro = "Erro ao fazer upload da imagem.";
         }
     }
 
@@ -102,12 +101,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bindParam(':imagem', $imagem);
     $stmt->bindParam(':data_criacao', $data_criacao);
 
+    // Verifica se a inserção foi bem-sucedida
     if ($stmt->execute()) {
-        // Sucesso, pode redirecionar ou exibir uma mensagem
-        echo "Post publicado com sucesso!";
+        $mensagem_sucesso = "Post publicado com sucesso!";
     } else {
-        // Em caso de erro
-        echo "Erro ao publicar o post.";
+        $mensagem_erro = "Erro ao publicar o post.";
     }
 }
 
@@ -137,43 +135,34 @@ $posts = $stmt->fetchAll();
             <button class="foto-perfil" aria-label="Foto de Perfil" onclick="window.location.href='perfil.php'">
                 <img src="img\cog.png" alt="Foto de Perfil" class="icone">
             </button>
-            <button class="btn-notificacoes" aria-label="Notificações" onclick="toggleNotificacoes()">
+            <button class="btn-notificacoes" aria-label="Notificações" onclick="window.location.href='notificacoes.php'">
             <img src="img\bell.png" alt="Notificações" class="icone">
             </button>
             <button class="btn-deslogar" aria-label="Deslogar" onclick="window.location.href='logout.php'">
-                <img src="img\logout.png" alt="Deslogar" class="icone"> <!-- Ícone de deslogar (logout.png) -->
+                <img src="img\logout.png" alt="Deslogar" class="icone">
             </button>
         </div>
     </header>
 
-    <!-- Container para as Notificações -->
-    <div id="notificacoes-container" class="notificacoes-container">
-        <div class="notificacoes-conteudo">
-            <h2>Notificações</h2>
-            <span class="fechar" onclick="toggleNotificacoes()">&times;</span>
-            <div id="lista-notificacoes">
-                <?php 
-                // Código para buscar as notificações
-                $queryNotificacoes = "SELECT * FROM notificacoes WHERE id_usuario = :id_usuario ORDER BY data_criacao DESC";
-                $stmtNotificacoes = $pdo->prepare($queryNotificacoes);
-                $stmtNotificacoes->bindParam(':id_usuario', $id_usuario);
-                $stmtNotificacoes->execute();
-                $notificacoes = $stmtNotificacoes->fetchAll();
-
-                foreach ($notificacoes as $notificacao): ?>
-                    <div class="notificacao-item">
-                        <p><?php echo htmlspecialchars($notificacao['mensagem']); ?></p>
-                        <small><?php echo $notificacao['data_criacao']; ?></small>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-    </div>
-
-
     <!-- Feed de Posts -->
     <main class="main-feed"> 
         <div class="container-feed">
+
+            <!-- Mensagens de Sucesso/Erro -->
+            <div class="mensagem-status">
+                <?php if (!empty($mensagem_sucesso)): ?>
+                    <div class="sucesso">
+                        <p><?php echo htmlspecialchars($mensagem_sucesso); ?></p>
+                    </div>
+                <?php endif; ?>
+                <?php if (!empty($mensagem_erro)): ?>
+                    <div class="erro">
+                        <p><?php echo htmlspecialchars($mensagem_erro); ?></p>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Formulário de Publicação -->
             <div class="feed-post-form"> 
                 <form action="feed.php" method="POST" enctype="multipart/form-data">
                     <textarea name="post_text" placeholder="O que você está pensando?" required></textarea>
@@ -182,10 +171,13 @@ $posts = $stmt->fetchAll();
                 </form>
             </div>
 
+            <!-- Lista de Posts -->
             <div class="feed-posts">
                 <?php foreach ($posts as $post): ?>
                     <div class="feed-post"> 
-                        <img src="<?php echo htmlspecialchars($post['imagem']); ?>" alt="Post Image">
+                        <?php if (!empty($post['imagem'])): ?>
+                            <img src="<?php echo htmlspecialchars($post['imagem']); ?>" alt="Post Image">
+                        <?php endif; ?>
                         <p><?php echo htmlspecialchars($post['texto']); ?></p>
                         <small>Postado por <?php echo htmlspecialchars($post['id_usuario']); ?> em <?php echo $post['data_criacao']; ?></small>
                         <div class="interacao-feed"> 
@@ -195,6 +187,7 @@ $posts = $stmt->fetchAll();
                     </div>
                 <?php endforeach; ?>
             </div>
+
         </div>
     </main>
 
@@ -203,7 +196,5 @@ $posts = $stmt->fetchAll();
             alert('Abrir comentários para o post ID: ' + id);
         }
     </script>
-    <script src="js\notificacoes.js"></script>
-
 </body>
 </html>
