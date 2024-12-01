@@ -69,7 +69,7 @@ if (isset($_GET['id_usuario'])) {
     $id_usuario_perfil = $id_usuario;  // Caso não haja parâmetro, assume que é o perfil do usuário logado
 }
 
-$posts = carregarPostagens($pdo, $id_usuario, $id_usuario_perfil);
+$posts = carregarPostagensFeed($pdo, $id_usuario_perfil);
 
 
 // Exibir posts

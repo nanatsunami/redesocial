@@ -68,17 +68,5 @@ function contarNotificacoesNaoLidas($pdo, $id_usuario) {
     return $stmtNotificacoesNaoLidas->fetchColumn();
 }
 
-function carregarNotificacoes($pdo, $id_usuario) {
-    $query = "SELECT n.*, 
-                     u.nome_usuario AS nome_usuario_origem
-              FROM notificacoes n
-              JOIN usuarios u ON n.id_usuario = u.id
-              WHERE n.id_usuario_destinatario = :id_usuario
-              ORDER BY n.data_criacao DESC";
-    $stmt = $pdo->prepare($query);
-    $stmt->bindParam(':id_usuario', $id_usuario);
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
 
 ?>

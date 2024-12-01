@@ -12,7 +12,7 @@ $id_usuario_logado = $_SESSION['id_usuario']; // ID do usuário logado
 
 // Verifica se o usuário está logado
 if (!isset($id_usuario_logado)) {
-    header('Location: login.php'); // Redireciona para a página de login se não estiver logado
+    header('Location: index.php'); // Redireciona para a página de login se não estiver logado
     exit;
 }
 
@@ -25,16 +25,17 @@ if (isset($_GET['id_usuario'])) {
     $is_perfil_visivel = false; // O perfil do usuário logado está sendo visualizado
 }
 
+// Carregar o perfil do usuário
+$usuario = carregarPerfil($pdo, $id_usuario); // Função movida para o arquivo usuario.php
+
+// Carregar as postagens do perfil de um usuário específico
+$posts = carregarPostagensPerfil($pdo, $id_usuario); // Usando a função ajustada
+
 // Agora que $id_usuario está definido, podemos carregar as notificações
 $preferenciasGlobais = obterPreferenciasNotificacoes($pdo, $id_usuario);
 $notificacoesNaoLidas = contarNotificacoesNaoLidas($pdo, $id_usuario);
 
-// Carregar o perfil do usuário
-$usuario = carregarPerfil($pdo, $id_usuario); // Função movida para o arquivo usuario.php
-
-// Carregar postagens: usamos a nova função personalizada para o perfil
-$posts = carregarPostagensPerfil($pdo, $id_usuario_logado, $id_usuario); // A função agora leva em conta o contexto de bloqueio e visibilidade
-
+// Verificação para curtir um post
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['acao'])) {
     if ($_POST['acao'] == 'curtir') {
         $post_id = $_POST['post_id'];
@@ -44,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['acao'])) {
 
 // Lógica de deletar post
 $mensagem_sucesso = ''; // Inicializando a variável para mensagens de sucesso
-$mensagem_erro = ''; // Inicializando a variável para mensagens de erro
+$mensagem_erro = ''; // Inicializando a variável de erro
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['acao']) && $_POST['acao'] == 'deletar') {
     $post_id = $_POST['post_id'];
@@ -68,30 +69,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['acao']) && $_POST['aca
 <body>
     <!-- Cabeçalho fixo -->
     <header class="header-fixo">
-    <div class="logo">
-        <a href="feed.php" class="btn-rede-social">Rede Social</a>
-    </div>
-    <div class="header-botoes">
-        <button class="foto-perfil" aria-label="Foto de Perfil" onclick="window.location.href='perfil.php'">
-            <img src="img\profile.png" alt="Foto de Perfil" class="icone">
-        </button>
-        <button class="btn-notificacoes" aria-label="Notificações" onclick="window.location.href='lista_notificacoes.php'">
-            <img src="img\bell.png" alt="Notificações" class="icone">
-            <?php if ($notificacoesNaoLidas > 0): ?>
-                <span class="pontinho-vermelho"></span>
-            <?php endif; ?>
-        </button>
-        <button class="btn-deslogar" aria-label="Deslogar" onclick="window.location.href='logout.php'">
-            <img src="img\logout.png" alt="Deslogar" class="icone">
-        </button>
-    </div>
+        <div class="logo">
+            <a href="feed.php" class="btn-rede-social">Rede Social</a>
+        </div>
+        <div class="header-botoes">
+            <button class="foto-perfil" aria-label="Foto de Perfil" onclick="window.location.href='perfil.php'">
+                <img src="img\profile.png" alt="Foto de Perfil" class="icone">
+            </button>
+            <button class="btn-notificacoes" aria-label="Notificações" onclick="window.location.href='lista_notificacoes.php'">
+                <img src="img\bell.png" alt="Notificações" class="icone">
+                <?php if ($notificacoesNaoLidas > 0): ?>
+                    <span class="pontinho-vermelho"></span>
+                <?php endif; ?>
+            </button>
+            <button class="btn-deslogar" aria-label="Deslogar" onclick="window.location.href='logout.php'">
+                <img src="img\logout.png" alt="Deslogar" class="icone">
+            </button>
+        </div>
     </header>
 
     <!-- Perfil do Usuário -->
     <main class="perfil-main">
         <div class="container-feed">
             <div class="perfil-info">
-                <!-- Nome de usuário e botão para editar o perfil -->
                 <div class="nome-usuario">
                     <h1><?php echo htmlspecialchars($usuario['nome_usuario']); ?></h1>
                     <?php if (!$is_perfil_visivel): ?>
@@ -99,13 +99,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['acao']) && $_POST['aca
                     <?php endif; ?>
                 </div>
 
-                <!-- Informações do usuário -->
                 <div class="informacoes-usuario">
                     <p><strong>Data de cadastro:</strong> <?php echo date('d/m/Y', strtotime($usuario['data_criacao'])); ?></p>
                 </div>
             </div>
 
-            <!-- Mensagens de Sucesso/Erro -->
             <div class="mensagem-status">
                 <?php if (!empty($mensagem_sucesso)): ?>
                     <div class="sucesso">
@@ -124,7 +122,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['acao']) && $_POST['aca
                 <?php foreach ($posts as $post): ?>
                     <div class="post"> 
                         <?php if ($post['id_usuario'] == $id_usuario): ?>
-                            <!-- Ícone de 3 bolinhas para o usuário dono do post -->
                             <div class="opcoes-post">
                                 <button class="opcoes-btn" onclick="mostrarOpcoes(<?php echo $post['id']; ?>)">...</button>
                                 <div id="opcoes-<?php echo $post['id']; ?>" class="opcoes-menu" style="display: none;">
@@ -146,7 +143,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['acao']) && $_POST['aca
                         </small>
                         <div class="interacao-feed">
                             <?php
-                                // Contar as curtidas para a postagem
                                 $numero_curtidas = contarCurtidas($pdo, $post['id']);
                             ?>
                             <form action="perfil.php" method="POST">
@@ -164,7 +160,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['acao']) && $_POST['aca
     </main>
 
     <script>
-        // Função para exibir ou esconder o menu de opções do post
         function mostrarOpcoes(postId) {
             var menu = document.getElementById('opcoes-' + postId);
             if (menu.style.display === "none") {

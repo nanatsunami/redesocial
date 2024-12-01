@@ -33,43 +33,32 @@ function deletarPostagem($pdo, $id_usuario, $post_id) {
     return $stmtDeletarPost->execute();
 }
 
-function carregarPostagens($pdo, $id_usuario_logado, $id_usuario_perfil) {
-    // Se for o perfil do usuário logado, mostra apenas as postagens dele
-    if ($id_usuario_logado == $id_usuario_perfil) {
-        // Apenas um parâmetro :id_usuario
-        $queryPosts = "
-            SELECT p.id, p.texto, p.imagem, p.data_criacao, u.id AS id_usuario, u.nome AS nome_usuario
-            FROM publicacoes p
-            JOIN usuarios u ON u.id = p.id_usuario
-            WHERE p.id_usuario = :id_usuario
-            ORDER BY p.data_criacao DESC";
-        
-        // Preparar e vincular apenas o parâmetro :id_usuario
-        $stmtPosts = $pdo->prepare($queryPosts);
-        $stmtPosts->bindParam(':id_usuario', $id_usuario_perfil, PDO::PARAM_INT);
-    } else {
-        // Se for o perfil de outro usuário, exibe as postagens dele, considerando bloqueios
-        $queryPosts = "
-            SELECT p.id, p.texto, p.imagem, p.data_criacao, u.nome_usuario 
-            FROM publicacoes p
-            JOIN usuarios u ON p.id_usuario = u.id
-            WHERE p.id_usuario = :id_usuario
-            AND NOT EXISTS (SELECT 1 FROM bloqueios b WHERE b.id_usuario_bloqueado = p.id_usuario AND b.id_usuario = :id_usuario_logado)
-            ORDER BY p.data_criacao DESC";
-        
-        // Preparar e vincular ambos os parâmetros :id_usuario e :id_usuario_logado
-        $stmtPosts = $pdo->prepare($queryPosts);
-        $stmtPosts->bindParam(':id_usuario', $id_usuario_perfil, PDO::PARAM_INT);
-        $stmtPosts->bindParam(':id_usuario_logado', $id_usuario_logado, PDO::PARAM_INT);
-    }
+function carregarPostagensFeed($pdo, $id_usuario_logado) {
+    // Consulta para pegar todas as postagens que o usuário logado pode ver
+    $query = "
+        SELECT p.*, u.nome_usuario
+        FROM publicacoes p
+        INNER JOIN usuarios u ON p.id_usuario = u.id
+        WHERE p.id_usuario NOT IN (
+            SELECT id_usuario_bloqueado
+            FROM bloqueios
+            WHERE id_usuario = :id_usuario_logado
+        )
+        AND p.id_usuario NOT IN (
+            SELECT id_usuario
+            FROM bloqueios
+            WHERE id_usuario_bloqueado = :id_usuario_logado
+        )
+        ORDER BY p.data_criacao DESC
+    ";
     
-    // Executar e retornar os resultados
-    if ($stmtPosts->execute()) {
-        return $stmtPosts->fetchAll(PDO::FETCH_ASSOC);
-    } else {
-        return [];
-    }
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':id_usuario_logado', $id_usuario_logado, PDO::PARAM_INT);
+    $stmt->execute();
+    
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
 
 
 // Função para carregar uma postagem específica pelo seu ID
@@ -84,17 +73,24 @@ function carregarPostagemPorId($pdo, $post_id) {
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-// Função para carregar as postagens de um perfil específico
-function carregarPostagensPerfil($pdo, $id_usuario_logado, $id_usuario_perfil) {
-    // Se for o perfil do usuário logado, mostra as postagens dele
-    if ($id_usuario_logado == $id_usuario_perfil) {
-        // Carregar as postagens do usuário logado
-        return carregarPostagens($pdo, $id_usuario_logado, $id_usuario_logado);
-    } else {
-        // Carregar as postagens de outro usuário, considerando bloqueios
-        return carregarPostagens($pdo, $id_usuario_logado, $id_usuario_perfil);
-    }
+// Função para carregar as postagens de um usuário específico (perfil)
+function carregarPostagensPerfil($pdo, $id_usuario_perfil) {
+    // Consulta para pegar as postagens do usuário específico
+    $query = "
+        SELECT p.*, u.nome_usuario
+        FROM publicacoes p
+        INNER JOIN usuarios u ON p.id_usuario = u.id
+        WHERE p.id_usuario = :id_usuario_perfil
+        ORDER BY p.data_criacao DESC
+    ";
+
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':id_usuario_perfil', $id_usuario_perfil, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
 
 // Função para contar o número de curtidas em uma postagem
 function contarCurtidas($pdo, $post_id) {
