@@ -26,7 +26,12 @@ if (isset($_GET['id_usuario'])) {
 }
 
 // Carregar o perfil do usuário
-$usuario = carregarPerfil($pdo, $id_usuario); // Função movida para o arquivo usuario.php
+$usuario = carregarPerfil($pdo, $id_usuario);
+
+// Verificação de erro no retorno de $usuario
+if (empty($usuario)) {
+    die("Erro ao carregar o perfil do usuário.");
+}
 
 // Carregar as postagens do perfil de um usuário específico
 $posts = carregarPostagensPerfil($pdo, $id_usuario); // Usando a função ajustada
@@ -56,6 +61,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['acao']) && $_POST['aca
         $mensagem_erro = "Erro ao deletar o post."; // Mensagem de erro
     }
 }
+// Carregar o ID do tema do usuário
+$query = "SELECT id_tema FROM usuarios WHERE id = :id_usuario";
+$stmt = $pdo->prepare($query);
+$stmt->bindParam(':id_usuario', $id_usuario);
+$stmt->execute();
+$usuario_tema = $stmt->fetch(PDO::FETCH_ASSOC);  // Use uma variável diferente para os dados do tema
+
+// Carregar as cores do tema
+$query = "SELECT * FROM temas WHERE id = :id_tema";
+$stmt = $pdo->prepare($query);
+$stmt->bindParam(':id_tema', $usuario_tema['id_tema']);
+$stmt->execute();
+$tema = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
 ?>
 
 <!DOCTYPE html>
@@ -117,45 +137,58 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['acao']) && $_POST['aca
                 <?php endif; ?>
             </div>
 
-            <!-- Lista de Posts -->
             <div class="feed">
-                <?php foreach ($posts as $post): ?>
-                    <div class="post"> 
-                        <?php if ($post['id_usuario'] == $id_usuario): ?>
-                            <div class="opcoes-post">
-                                <button class="opcoes-btn" onclick="mostrarOpcoes(<?php echo $post['id']; ?>)">...</button>
-                                <div id="opcoes-<?php echo $post['id']; ?>" class="opcoes-menu" style="display: none;">
-                                    <form action="perfil.php" method="POST">
-                                        <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>">
-                                        <button type="submit" name="acao" value="deletar">Deletar</button>
-                                    </form>
-                                </div>
+            <?php foreach ($posts as $post): ?>
+                <div class="post">
+                    <!-- Se o post for do usuário logado, mostrar opções de deletar -->
+                    <?php if ($post['id_usuario'] == $id_usuario_logado): ?>
+                        <div class="opcoes-post">
+                            <button class="opcoes-btn" onclick="mostrarOpcoes(<?php echo $post['id']; ?>)">...</button>
+                            <div id="opcoes-<?php echo $post['id']; ?>" class="opcoes-menu" style="display: none;">
+                                <form action="perfil.php" method="POST">
+                                    <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>">
+                                    <button type="submit" name="acao" value="deletar">Deletar</button>
+                                </form>
                             </div>
-                        <?php endif; ?>
-
-                        <?php if (!empty($post['imagem'])): ?>
-                            <img src="<?php echo htmlspecialchars($post['imagem']); ?>" alt="Post Image">
-                        <?php endif; ?>
-                        <p><?php echo htmlspecialchars($post['texto']); ?></p>
-                        <small>
-                            Postado por <a href="perfil.php?id_usuario=<?php echo $post['id_usuario']; ?>"><?php echo htmlspecialchars($post['nome_usuario']); ?></a>
-                            em <?php echo $post['data_criacao']; ?>
-                        </small>
-                        <div class="interacao-feed">
-                            <?php
-                                $numero_curtidas = contarCurtidas($pdo, $post['id']);
-                            ?>
-                            <form action="perfil.php" method="POST">
-                                <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>">
-                                <button type="submit" name="acao" value="curtir">
-                                    <?php echo ($numero_curtidas > 0) ? $numero_curtidas : "Curtir"; ?>
-                                </button>
-                            </form>
-                            <button onclick="window.location.href='lista_comentarios.php?post_id=<?php echo $post['id']; ?>'">Comentários</button>
                         </div>
+                    <?php else: ?>
+                        <!-- Se o post for de outro usuário, mostrar opção de bloquear -->
+                        <div class="opcoes-post">
+                            <button class="opcoes-btn" onclick="mostrarOpcoes(<?php echo $post['id']; ?>)">...</button>
+                            <div id="opcoes-<?php echo $post['id']; ?>" class="opcoes-menu" style="display: none;">
+                                <form action="perfil.php" method="POST">
+                                    <input type="hidden" name="id_usuario_bloqueado" value="<?php echo $post['id_usuario']; ?>">
+                                    <button type="submit" name="acao" value="bloquear">Bloquear</button>
+                                </form>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($post['imagem'])): ?>
+                        <img src="<?php echo htmlspecialchars($post['imagem']); ?>" alt="Post Image">
+                    <?php endif; ?>
+                    <p><?php echo htmlspecialchars($post['texto']); ?></p>
+                    <small>
+                        Postado por <a href="perfil.php?id_usuario=<?php echo $post['id_usuario']; ?>"><?php echo htmlspecialchars($post['nome_usuario']); ?></a>
+                        em <?php echo $post['data_criacao']; ?>
+                    </small>
+                    <div class="interacao-feed">
+                        <?php
+                            $numero_curtidas = contarCurtidas($pdo, $post['id']);
+                        ?>
+                        <form action="perfil.php" method="POST">
+                            <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>">
+                            <button type="submit" name="acao" value="curtir">
+                                <?php echo ($numero_curtidas > 0) ? $numero_curtidas : "Curtir"; ?>
+                            </button>
+                        </form>
+                        <button onclick="window.location.href='lista_comentarios.php?post_id=<?php echo $post['id']; ?>'">Comentários</button>
                     </div>
-                <?php endforeach; ?>
-            </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+
+
         </div> <!-- Fechando a container-feed -->
     </main>
 

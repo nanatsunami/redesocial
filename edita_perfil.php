@@ -28,6 +28,39 @@ if (isset($_GET['id_usuario'])) {
     $id_usuario = $id_usuario_logado;
 }
 
+// Processar a alteração do tema
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['acao'] == 'alterar_tema') {
+    $id_usuario = $_SESSION['id_usuario'];  // ID do usuário logado
+    $id_tema = $_POST['id_tema'];  // ID do tema escolhido
+
+    // Atualiza o tema no banco de dados
+    $query = "UPDATE usuarios SET id_tema = :id_tema WHERE id = :id_usuario";
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':id_tema', $id_tema);
+    $stmt->bindParam(':id_usuario', $id_usuario);
+    
+    if ($stmt->execute()) {
+        $mensagem_sucesso = "Tema alterado com sucesso!";
+    } else {
+        $mensagem_erro = "Erro ao alterar o tema. Tente novamente.";
+    }
+}
+
+
+// Carregar o ID do tema do usuário
+$query = "SELECT id_tema FROM usuarios WHERE id = :id_usuario";
+$stmt = $pdo->prepare($query);
+$stmt->bindParam(':id_usuario', $id_usuario);
+$stmt->execute();
+$usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Carregar as cores do tema
+$query = "SELECT * FROM temas WHERE id = :id_tema";
+$stmt = $pdo->prepare($query);
+$stmt->bindParam(':id_tema', $usuario['id_tema']);
+$stmt->execute();
+$tema = $stmt->fetch(PDO::FETCH_ASSOC);
+
 // Carregar o perfil do usuário
 $usuario = carregarPerfil($pdo, $id_usuario); 
 
@@ -53,19 +86,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['acao']) && $_POST['aca
     }
 }
 
-// Processando o envio do formulário para alterar o tema
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_tema'])) {
-    // Verifica se o tema foi alterado
-    $id_usuario = $_SESSION['id_usuario'];  // ID do usuário da sessão
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['acao'] == 'alterar_tema') {
+    $id_usuario = $_SESSION['id_usuario'];  // ID do usuário logado
     $id_tema = $_POST['id_tema'];  // ID do tema escolhido
 
-    // Chama a função para alterar o tema
-    if (alterarTema($pdo, $id_usuario, $id_tema)) {
-        $mensagem_sucesso = "Tema alterado com sucesso!";
+    // Atualiza o tema no banco de dados
+    $query = "UPDATE usuarios SET id_tema = :id_tema WHERE id = :id_usuario";
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':id_tema', $id_tema);
+    $stmt->bindParam(':id_usuario', $id_usuario);
+    
+    if ($stmt->execute()) {
+        // Redireciona para a página de edição do perfil para carregar o novo tema
+        header('Location: edita_perfil.php');
+        exit;  // Garante que o código não será executado após o redirecionamento
     } else {
         $mensagem_erro = "Erro ao alterar o tema. Tente novamente.";
     }
 }
+
 
 // Processar o desbloqueio de um usuário
 if (isset($_POST['acao']) && $_POST['acao'] == 'desbloquear_usuario' && isset($_POST['id_usuario_bloqueado'])) {
@@ -90,15 +129,6 @@ if (isset($_POST['acao']) && $_POST['acao'] == 'bloquear_usuario' && isset($_POS
     } else {
         $mensagem_erro = "Erro ao bloquear o usuário.";
     }
-}
-
-// Função para bloquear um usuário
-function bloquearUsuario($pdo, $id_usuario_bloqueador, $id_usuario_bloqueado) {
-    $query = "INSERT INTO bloqueios (id_usuario_bloqueador, id_usuario_bloqueado, data_bloqueio) VALUES (:id_usuario_bloqueador, :id_usuario_bloqueado, NOW())";
-    $stmt = $pdo->prepare($query);
-    $stmt->bindParam(':id_usuario_bloqueador', $id_usuario_bloqueador);
-    $stmt->bindParam(':id_usuario_bloqueado', $id_usuario_bloqueado);
-    return $stmt->execute();
 }
 
 // Carregar os dados do perfil do usuário
@@ -206,8 +236,68 @@ $usuarios_bloqueados = obterUsuariosBloqueados($pdo, $id_usuario);
                 <?php else: ?>
                     <p>Você não tem usuários bloqueados.</p>
                 <?php endif; ?>
+
+                <h2>Alterar Tema</h2>
+                <form action="edita_perfil.php" method="POST" onsubmit="changeTheme(document.getElementById('id_tema').value); return false;">
+                    <label for="id_tema">Escolha o Tema:</label>
+                    <select name="id_tema" id="id_tema">
+                        <option value="1">Roxo</option>
+                        <option value="2">Rosa</option>
+                        <option value="3">Verde</option>
+                        <option value="4">Azul</option>
+                    </select>
+                    <button type="submit" name="acao" value="alterar_tema">Salvar Tema</button>
+                </form>
             </div>
         </div>
     </main>
+    <script>
+    <script>
+    function changeTheme(themeId) {
+        let themeClass = '';
+
+        // Definindo a classe do tema baseado no ID
+        switch (themeId) {
+            case '4': // Tema Roxo
+                themeClass = 'theme-roxo';
+                break;
+            case '5': // Tema Rosa
+                themeClass = 'theme-rosa';
+                break;
+            case '6': // Tema Verde
+                themeClass = 'theme-verde';
+                break;
+            case '7': // Tema Azul
+                themeClass = 'theme-azul';
+                break;
+            default:
+                themeClass = 'theme-roxo'; // Fallback para roxo
+        }
+
+        // Alterando a classe do body para aplicar o tema
+        document.body.className = themeClass;
+
+        // Salvar o tema selecionado no localStorage para persistir entre recarregamentos
+        localStorage.setItem('theme', themeClass);
+    }
+
+    // Carregar o tema salvo no localStorage quando a página for carregada
+    window.onload = function() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.className = savedTheme;
+        }
+    };
+    function lightenColor(hex, percent) {
+        const color = hex.replace("#", "");
+        const r = parseInt(color.substring(0, 2), 16) + Math.round(2.55 * percent);
+        const g = parseInt(color.substring(2, 4), 16) + Math.round(2.55 * percent);
+        const b = parseInt(color.substring(4, 6), 16) + Math.round(2.55 * percent);
+
+        return `rgb(${Math.min(r, 255)}, ${Math.min(g, 255)}, ${Math.min(b, 255)})`;
+    }
+    </script>
+
+
 </body>
 </html>

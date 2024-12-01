@@ -91,7 +91,6 @@ function carregarPostagensPerfil($pdo, $id_usuario_perfil) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-
 // Função para contar o número de curtidas em uma postagem
 function contarCurtidas($pdo, $post_id) {
     // Alterar 'id_post' para o nome correto da coluna, como 'id_publicacao'
@@ -106,7 +105,7 @@ function adicionarOuRemoverCurtir($pdo, $id_usuario, $id_item, $tipo) {
     $tabela = 'curtidas'; // Usar a tabela única de curtidas
     if ($tipo == 'post') {
         $campo_id = 'id_publicacao'; // Para postagens
-        $queryPost = "SELECT id_usuario FROM publicacoes WHERE id = :id_item"; // Para obter o autor da post
+        $queryPost = "SELECT id_usuario FROM publicacoes WHERE id = :id_item"; // Para obter o autor da postagem
     } elseif ($tipo == 'comentario') {
         $campo_id = 'id_comentario'; // Para comentários
         $queryPost = "SELECT id_usuario FROM comentarios WHERE id = :id_item"; // Para obter o autor do comentário
@@ -137,6 +136,9 @@ function adicionarOuRemoverCurtir($pdo, $id_usuario, $id_item, $tipo) {
         $stmt->bindParam(':id_item', $id_item);
         $stmt->execute();
 
+        // Recuperar o id da curtida que acabou de ser inserido
+        $id_curtida = $pdo->lastInsertId();
+
         // Adiciona a notificação para o dono da postagem/comentário
         $stmtPost = $pdo->prepare($queryPost);
         $stmtPost->bindParam(':id_item', $id_item);
@@ -156,14 +158,13 @@ function adicionarOuRemoverCurtir($pdo, $id_usuario, $id_item, $tipo) {
             $stmtNotificacao->bindParam(':tipo', $tipo);
             $stmtNotificacao->bindParam(':mensagem', $mensagem);
             $stmtNotificacao->bindParam(':id_publicacao', $id_item);  // Pode ser tanto id_publicacao ou id_comentario
-            $stmtNotificacao->bindParam(':id_curtida', $id_item);  // Guarda o ID da curtida
+            $stmtNotificacao->bindParam(':id_curtida', $id_curtida);  // Agora garante que o id_curtida é válido
             $stmtNotificacao->execute();
         }
 
         return 'adicionado'; // Retorna 'adicionado' se a curtida foi inserida
     }
 }
-
 
 function deletarComentario($pdo, $id_usuario, $comentario_id) {
     $queryDeletarComentario = "DELETE FROM comentarios WHERE id = :comentario_id AND id_usuario = :id_usuario";
@@ -175,19 +176,31 @@ function deletarComentario($pdo, $id_usuario, $comentario_id) {
 
 function comentarPostagem($pdo, $id_usuario, $post_id, $comentario) {
     $data_criacao = date('Y-m-d H:i:s');
+
+    // Garantir que $id_usuario, $post_id, e $comentario são variáveis e do tipo correto
+    $id_usuario = (int)$id_usuario; // Converte para inteiro
+    $post_id = (int)$post_id; // Converte para inteiro
+    $comentario = (string)$comentario; // Converte para string
+    $data_criacao = (string)$data_criacao; // Converte para string
+
+    // Preparação da consulta SQL
     $queryComentar = "INSERT INTO comentarios (id_usuario, id_publicacao, texto, data_criacao) 
                       VALUES (:id_usuario, :post_id, :texto, :data_criacao)";
     $stmtComentar = $pdo->prepare($queryComentar);
-    $stmtComentar->bindParam(':id_usuario', $id_usuario);
-    $stmtComentar->bindParam(':post_id', $post_id);
-    $stmtComentar->bindParam(':texto', $comentario);
-    $stmtComentar->bindParam(':data_criacao', $data_criacao);
+
+    // Agora passamos as variáveis corretamente com bindValue()
+    $stmtComentar->bindValue(':id_usuario', $id_usuario, PDO::PARAM_INT); // Usar bindValue() ao invés de bindParam()
+    $stmtComentar->bindValue(':post_id', $post_id, PDO::PARAM_INT);
+    $stmtComentar->bindValue(':texto', $comentario, PDO::PARAM_STR);
+    $stmtComentar->bindValue(':data_criacao', $data_criacao, PDO::PARAM_STR);
+
+    // Executa a consulta
     $stmtComentar->execute();
 
     // Adiciona a notificação para o autor da postagem
     $queryAutorPost = "SELECT id_usuario FROM publicacoes WHERE id = :post_id";
     $stmtAutorPost = $pdo->prepare($queryAutorPost);
-    $stmtAutorPost->bindParam(':post_id', $post_id);
+    $stmtAutorPost->bindValue(':post_id', $post_id, PDO::PARAM_INT);  // Garantindo o tipo correto
     $stmtAutorPost->execute();
     $autor = $stmtAutorPost->fetchColumn(); // ID do autor da postagem
 
@@ -198,19 +211,18 @@ function comentarPostagem($pdo, $id_usuario, $post_id, $comentario) {
 
         // Inserir a notificação
         $queryNotificacao = "INSERT INTO notificacoes (id_usuario, tipo, mensagem, id_publicacao, id_comentario) 
-                             VALUES (:id_usuario, :tipo, :mensagem, :id_publicacao, :id_comentario)";
+                     VALUES (:id_usuario, :tipo, :mensagem, :id_publicacao, :id_comentario)";
         $stmtNotificacao = $pdo->prepare($queryNotificacao);
-        $stmtNotificacao->bindParam(':id_usuario', $autor);
-        $stmtNotificacao->bindParam(':tipo', 'comentario');
-        $stmtNotificacao->bindParam(':mensagem', $mensagem);
-        $stmtNotificacao->bindParam(':id_publicacao', $post_id);
-        $stmtNotificacao->bindParam(':id_comentario', $comentario);  // Guarde o ID do comentário
+        $stmtNotificacao->bindValue(':id_usuario', $autor, PDO::PARAM_INT);
+        $stmtNotificacao->bindValue(':tipo', $tipo = 'comentario', PDO::PARAM_STR);
+        $stmtNotificacao->bindValue(':mensagem', $mensagem, PDO::PARAM_STR);
+        $stmtNotificacao->bindValue(':id_publicacao', $post_id, PDO::PARAM_INT);
+        $stmtNotificacao->bindValue(':id_comentario', $comentario_id, PDO::PARAM_INT);  // Use o $comentario_id gerado
         $stmtNotificacao->execute();
+        $comentario_id = $pdo->lastInsertId();
     }
-
     return true; // Retorna true se o comentário foi inserido
 }
-
 
 function carregarComentarios($pdo, $id_usuario, $post_id) {
     $queryComentarios = "SELECT c.*, u.nome_usuario 

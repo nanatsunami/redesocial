@@ -524,11 +524,6 @@ button[type="submit"]:hover {
     align-items: center;
 }
 
-.foto-perfil {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
 
 /* Nome do usuário */
 .nome-usuario {
@@ -563,176 +558,52 @@ button[type="submit"]:hover {
 /*==============================================================
                             TEMAS                               
 ==============================================================*/
-/* Tema Claro */
-.theme-light {
-    background-color: #f5f8fa; /* Fundo claro */
-    color: #333; /* Texto escuro */
+/* Definindo cores padrões para o tema */
+:root {
+    --cor-fundo: #fff; /* Cor de fundo padrão */
+    --cor-texto: #000; /* Cor do texto */
+    --cor-secundaria: #f0f0f0; /* Cor secundária */
+    /* Outras variáveis podem ser definidas aqui */
 }
 
-.theme-light .header-fixo {
-    background-color: #333; /* Header escuro */
-    color: white; /* Texto branco */
+/* Tema Roxo */
+.theme-roxo {
+    --cor-fundo: #6a0dad;
+    --cor-texto: #ffffff;
+    --cor-secundaria: #9b59b6;
 }
 
-.theme-light .header-notificacoes h1 {
-    font-size: 24px;
-    margin: 0;
-    color: white;
-    text-align: center;
-    flex-shrink: 0;
+/* Tema Rosa */
+.theme-rosa {
+    --cor-fundo: #ff69b4;
+    --cor-texto: #ffffff;
+    --cor-secundaria: #ff1493;
 }
 
-.theme-light .secao-notificacoes li, .secao-comentarios li, .secao-curtidas li, .secao-post li {
-    padding: 10px;
-    background-color: #e0e0e0; /* Fundo claro para listas */
-    margin-bottom: 10px;
-    border-radius: 8px;
+/* Tema Verde */
+.theme-verde {
+    --cor-fundo: #2e8b57;
+    --cor-texto: #ffffff;
+    --cor-secundaria: #32cd32;
 }
 
-.theme-light .container-feed {
-    width: 100%;
-    max-width: 800px;
-    background-color: white; /* Fundo branco para o feed */
-    padding: 30px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+/* Tema Azul */
+.theme-azul {
+    --cor-fundo: #1e90ff;
+    --cor-texto: #ffffff;
+    --cor-secundaria: #4682b4;
 }
 
-.theme-light button[type="submit"] {
-    background-color: #4CAF50; /* Verde padrão */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-size: 14px;
-    border-radius: 5px;
-    transition: background-color 0.3s;
+/* Aplicando as variáveis no resto do CSS */
+body {
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
 }
 
-.theme-light button[type="submit"]:hover {
-    background-color: #45a049;
+.header-fixo {
+    background-color: var(--cor-secundaria);
 }
 
-.theme-light .post {
-    background-color: #fff;
-    margin-bottom: 30px;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-/* Tema Escuro */
-.theme-dark {
-    background-color: #121212; /* Fundo escuro */
-    color: #e0e0e0; /* Texto claro */
-}
-
-.theme-dark .header-fixo {
-    background-color: #1f1f1f; /* Header escuro */
-    color: white;
-}
-
-.theme-dark .header-notificacoes h1 {
-    font-size: 24px;
-    margin: 0;
-    color: white;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.theme-dark .secao-notificacoes li, .secao-comentarios li, .secao-curtidas li, .secao-post li {
-    padding: 10px;
-    background-color: #333; /* Fundo escuro para listas */
-    margin-bottom: 10px;
-    border-radius: 8px;
-}
-
-.theme-dark .container-feed {
-    width: 100%;
-    max-width: 800px;
-    background-color: #1e1e1e; /* Fundo mais escuro para o feed */
-    padding: 30px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-}
-
-.theme-dark button[type="submit"] {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-size: 14px;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-
-.theme-dark button[type="submit"]:hover {
-    background-color: #45a049;
-}
-
-.theme-dark .post {
-    background-color: #333; /* Fundo escuro para os posts */
-    margin-bottom: 30px;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-}
-
-/* Tema Midnight */
-.theme-midnight {
-    background-color: #2a1a1a; /* Fundo escuro com toques rosados */
-    color: #ffcccc; /* Texto suave e claro */
-}
-
-.theme-midnight .header-fixo {
-    background-color: #800000; /* Vermelho escuro para o header */
-    color: white;
-}
-
-.theme-midnight .header-notificacoes h1 {
-    font-size: 24px;
-    margin: 0;
-    color: white;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.theme-midnight .secao-notificacoes li, .secao-comentarios li, .secao-curtidas li, .secao-post li {
-    padding: 10px;
-    background-color: #3c1a1a; /* Fundo mais suave para listas */
-    margin-bottom: 10px;
-    border-radius: 8px;
-}
-
-.theme-midnight .container-feed {
-    width: 100%;
-    max-width: 800px;
-    background-color: #3c1a1a; /* Fundo similar ao background geral */
-    padding: 30px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-}
-
-.theme-midnight button[type="submit"] {
-    background-color: #4CAF50; /* Verde padrão */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-size: 14px;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-
-.theme-midnight button[type="submit"]:hover {
-    background-color: #45a049;
-}
-
-.theme-midnight .post {
-    background-color: #3c1a1a; /* Fundo para o post com tom mais quente */
-    margin-bottom: 30px;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
 
 /* =========================================================
                         HEADER PRINCIPAL
@@ -1117,12 +988,6 @@ button[type="submit"]:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.foto-perfil {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
 }
 
 /* Nome do usuário */

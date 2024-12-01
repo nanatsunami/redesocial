@@ -1,15 +1,16 @@
 <?php
 include('db.php');
 
-// Função para carregar o perfil de um usuário
 function carregarPerfil($pdo, $id_usuario) {
-    // Alterando a consulta para retornar 'nome_usuario' e 'data_criacao'
-    $sql = "SELECT nome AS nome_usuario, email, data_criacao FROM usuarios WHERE id = :id";
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':id', $id_usuario);
+    $query = "SELECT nome_usuario, email, data_criacao, id_tema FROM usuarios WHERE id = :id_usuario";
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':id_usuario', $id_usuario);
     $stmt->execute();
+    
+    // Verifique se a consulta foi bem-sucedida e se há dados retornados
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
+
 
 // Função para editar o perfil (nome e email)
 function editarPerfil($pdo, $id_usuario, $novo_nome, $novo_email) {
@@ -33,6 +34,7 @@ function alterarSenha($pdo, $id_usuario, $nova_senha) {
     return $stmt->execute();
 }
 
+// Função para obter os usuários bloqueados
 function obterUsuariosBloqueados($pdo, $id_usuario) {
     // SQL para obter os usuários bloqueados
     $query = "SELECT u.id, u.nome_usuario 
@@ -47,6 +49,29 @@ function obterUsuariosBloqueados($pdo, $id_usuario) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+// Função para verificar se um usuário está bloqueado
+function verificarSeBloqueado($pdo, $id_usuario_bloqueador, $id_usuario_bloqueado) {
+    $query = "SELECT * FROM bloqueios WHERE id_usuario_bloqueador = :id_usuario_bloqueador AND id_usuario_bloqueado = :id_usuario_bloqueado";
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':id_usuario_bloqueador', $id_usuario_bloqueador);
+    $stmt->bindParam(':id_usuario_bloqueado', $id_usuario_bloqueado);
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+// Função para bloquear um usuário
+function bloquearUsuario($pdo, $id_usuario_bloqueador, $id_usuario_bloqueado) {
+    // Verifica se já existe o bloqueio
+    if (!verificarSeBloqueado($pdo, $id_usuario_bloqueador, $id_usuario_bloqueado)) {
+        $query = "INSERT INTO bloqueios (id_usuario_bloqueador, id_usuario_bloqueado) VALUES (:id_usuario_bloqueador, :id_usuario_bloqueado)";
+        $stmt = $pdo->prepare($query);
+        $stmt->bindParam(':id_usuario_bloqueador', $id_usuario_bloqueador);
+        $stmt->bindParam(':id_usuario_bloqueado', $id_usuario_bloqueado);
+        return $stmt->execute();
+    }
+    return false; // Usuário já está bloqueado
+}
+
 // Função para desbloquear um usuário
 function desbloquearUsuario($pdo, $id_usuario_bloqueador, $id_usuario_bloqueado) {
     // SQL para remover o bloqueio
@@ -59,15 +84,6 @@ function desbloquearUsuario($pdo, $id_usuario_bloqueador, $id_usuario_bloqueado)
     return $stmt->execute();
 }
 
-// Função para verificar se um usuário está bloqueado
-function verificarSeBloqueado($pdo, $id_usuario_bloqueador, $id_usuario_bloqueado) {
-    $query = "SELECT * FROM bloqueios WHERE id_usuario_bloqueador = :id_usuario_bloqueador AND id_usuario_bloqueado = :id_usuario_bloqueado";
-    $stmt = $pdo->prepare($query);
-    $stmt->bindParam(':id_usuario_bloqueador', $id_usuario_bloqueador);
-    $stmt->bindParam(':id_usuario_bloqueado', $id_usuario_bloqueado);
-    $stmt->execute();
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
 
 
 // Função para obter as informações do tema com base no id
@@ -123,3 +139,15 @@ function alterarTema($pdo, $id_usuario, $id_tema) {
         return false;  // Erro na execução
     }
 }
+// Função para buscar o nome de um usuário baseado no ID
+function getUsuarioNome($pdo, $id_usuario) {
+    $query = "SELECT nome_usuario FROM usuarios WHERE id = :id_usuario";
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+    $stmt->execute();
+    
+    // Recupera o resultado e retorna o nome do usuário
+    $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $resultado['nome_usuario'] ?? ''; // Retorna o nome ou string vazia se não encontrado
+}
+
