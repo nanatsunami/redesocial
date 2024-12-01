@@ -7,113 +7,79 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 
-// Incluindo o arquivo de conexão com o banco de dados (PDO)
+// Incluindo o arquivo de conexão com o banco de dados (PDO), funções de notificações, postagens e bloqueios
 include('db.php');
+include('notificacoes.php');
+include('postagens.php');
+include('bloqueio.php');  // Incluindo o arquivo de bloqueio
 
 // ID do usuário logado
 $id_usuario = $_SESSION['id_usuario'];  // Supondo que o ID do usuário esteja armazenado na sessão
 
-// Verificar preferências globais de notificações
-$queryGlobais = "SELECT notificacao_comentarios_globais, notificacao_curtidas_globais FROM config_notificacoes WHERE id_usuario = :id_usuario";
-$stmtGlobais = $pdo->prepare($queryGlobais);
-$stmtGlobais->bindParam(':id_usuario', $id_usuario);
-$stmtGlobais->execute();
-$preferenciasGlobais = $stmtGlobais->fetch(PDO::FETCH_ASSOC);
+$preferenciasGlobais = obterPreferenciasNotificacoes($pdo, $id_usuario);
+$notificacoesNaoLidas = contarNotificacoesNaoLidas($pdo, $id_usuario);
 
-// Verificar se o usuário tem preferências definidas, caso contrário, define como padrão
-if ($preferenciasGlobais === false) {
-    // Se não houver preferências no banco, define valores padrão
-    $preferenciasGlobais = [
-        'notificacao_comentarios_globais' => 1, // Notificação de comentários ativada por padrão
-        'notificacao_curtidas_globais' => 1    // Notificação de curtidas ativada por padrão
-    ];
-}
+// Contar notificações não lidas
+$notificacoesNaoLidas = contarNotificacoesNaoLidas($pdo, $id_usuario);
 
-// Verificar se o usuário quer ser notificado sobre comentários globais
-if ($preferenciasGlobais['notificacao_comentarios_globais']) {
-    // Buscar notificações sobre comentários
-    $queryComentarios = "SELECT * FROM comentarios WHERE id_usuario != :id_usuario";
-    $stmtComentarios = $pdo->prepare($queryComentarios);
-    $stmtComentarios->bindParam(':id_usuario', $id_usuario);
-    $stmtComentarios->execute();
-
-    while ($comentario = $stmtComentarios->fetch(PDO::FETCH_ASSOC)) {
-        // Criar a notificação de comentário
-        $mensagemComentario = "Novo comentário no seu post: {$comentario['texto']}";
-        // Inserir a notificação na tabela de notificações
-        $insertNotificacao = "INSERT INTO notificacoes (id_usuario, tipo, mensagem) VALUES (:id_usuario, 'comentario', :mensagemComentario)";
-        $stmtNotificacao = $pdo->prepare($insertNotificacao);
-        $stmtNotificacao->bindParam(':id_usuario', $id_usuario);
-        $stmtNotificacao->bindParam(':mensagemComentario', $mensagemComentario);
-        $stmtNotificacao->execute();
-    }
-}
-
-// Verificar se o usuário quer ser notificado sobre curtidas globais
-if ($preferenciasGlobais['notificacao_curtidas_globais']) {
-    // Buscar notificações sobre curtidas
-    $queryCurtidas = "SELECT * FROM curtidas WHERE id_usuario != :id_usuario";
-    $stmtCurtidas = $pdo->prepare($queryCurtidas);
-    $stmtCurtidas->bindParam(':id_usuario', $id_usuario);
-    $stmtCurtidas->execute();
-
-    while ($curtida = $stmtCurtidas->fetch(PDO::FETCH_ASSOC)) {
-        // Criar a notificação de curtida
-        $mensagemCurtida = "Alguém curtiu seu post!";
-        // Inserir a notificação na tabela de notificações
-        $insertNotificacao = "INSERT INTO notificacoes (id_usuario, tipo, mensagem) VALUES (:id_usuario, 'curtida', :mensagemCurtida)";
-        $stmtNotificacao = $pdo->prepare($insertNotificacao);
-        $stmtNotificacao->bindParam(':id_usuario', $id_usuario);
-        $stmtNotificacao->bindParam(':mensagemCurtida', $mensagemCurtida);
-        $stmtNotificacao->execute();
-    }
-}
-
+// Processamento de ações do usuário
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Obtém o texto do post
-    $texto = $_POST['post_text'];
+    // Deletar post
+    if (isset($_POST['acao']) && $_POST['acao'] == 'deletar') {
+        $post_id = $_POST['post_id'];
+        $mensagem_sucesso = deletarPostagem($pdo, $id_usuario, $post_id) ? "Post deletado com sucesso!" : "Erro ao deletar o post.";
+    }
 
-    // Lógica para upload da imagem (caso tenha sido enviada)
-    $imagem = null;
-    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-        // Define o diretório para onde a imagem será salva
-        $diretorio = 'uploads/';  // Certifique-se de que esse diretório existe e tem permissões adequadas
-        $imagem_nome = basename($_FILES['image']['name']);
-        $imagem_destino = $diretorio . $imagem_nome;
+    // Bloquear usuário
+    elseif (isset($_POST['acao']) && $_POST['acao'] == 'bloquear') {
+        $id_usuario_bloqueado = $_POST['id_usuario_bloqueado'];
 
-        // Move a imagem para o diretório de uploads
-        if (move_uploaded_file($_FILES['image']['tmp_name'], $imagem_destino)) {
-            $imagem = $imagem_destino;  // Armazena o caminho da imagem
+        // Verifica se o usuário está tentando se bloquear
+        if ($id_usuario_bloqueado == $id_usuario) {
+            $mensagem_erro = "Você não pode bloquear a si mesmo.";
         } else {
-            $mensagem_erro = "Erro ao fazer upload da imagem.";
+            // Bloqueia o usuário utilizando a função do arquivo bloqueio.php
+            if (bloquearUsuario($pdo, $id_usuario, $id_usuario_bloqueado)) {
+                $mensagem_sucesso = "Usuário bloqueado com sucesso!";
+            } else {
+                $mensagem_erro = "Este usuário já está bloqueado.";
+            }
         }
     }
+    
+    // Publicação de post
+    elseif (!empty($_POST['texto'])) {
+        $texto = $_POST['texto']; // Captura o texto do post
+        $imagem = null;
 
-    // Obtém a data e hora atuais
-    $data_criacao = date('Y-m-d H:i:s');
+        // Lógica para upload da imagem
+        if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+            $imagem = fazerUploadImagem($_FILES['image']); // Função de upload, caso necessário
+        }
 
-    // Insere o post no banco de dados
-    $query = "INSERT INTO publicacoes (id_usuario, texto, imagem, data_criacao) 
-              VALUES (:id_usuario, :texto, :imagem, :data_criacao)";
-    $stmt = $pdo->prepare($query);
-    $stmt->bindParam(':id_usuario', $id_usuario);
-    $stmt->bindParam(':texto', $texto);
-    $stmt->bindParam(':imagem', $imagem);
-    $stmt->bindParam(':data_criacao', $data_criacao);
-
-    // Verifica se a inserção foi bem-sucedida
-    if ($stmt->execute()) {
-        $mensagem_sucesso = "Post publicado com sucesso!";
-    } else {
-        $mensagem_erro = "Erro ao publicar o post.";
+        // Criar o post utilizando a função centralizada
+        $mensagem_sucesso = criarPostagem($pdo, $id_usuario, $texto, $imagem) ? "Post publicado com sucesso!" : "Erro ao publicar o post.";
     }
 }
 
-// Lógica para buscar posts
-$query = "SELECT * FROM publicacoes ORDER BY data_criacao DESC";
-$stmt = $pdo->prepare($query);
-$stmt->execute();
-$posts = $stmt->fetchAll();
+// Carregar postagens do perfil de um usuário específico
+if (isset($_GET['id_usuario'])) {
+    $id_usuario_perfil = $_GET['id_usuario'];  // Obtém o ID do usuário da URL
+} else {
+    $id_usuario_perfil = $id_usuario;  // Caso não haja parâmetro, assume que é o perfil do usuário logado
+}
+
+$posts = carregarPostagens($pdo, $id_usuario, $id_usuario_perfil);
+
+
+// Exibir posts
+foreach ($posts as $post) {
+    // Carregar comentários de cada post
+    $comentarios = carregarComentarios($pdo, $id_usuario, $post['id']);
+    
+    // Carregar curtidas de cada post
+    $curtidas = carregarCurtidas($pdo, $id_usuario, $post['id']);
+}
 ?>
 
 <!DOCTYPE html>
@@ -125,23 +91,25 @@ $posts = $stmt->fetchAll();
     <title>Feed da Rede Social</title>
 </head>
 <body>
-
     <!-- Cabeçalho fixo -->
     <header class="header-fixo">
-        <div class="logo">
-            <a href="feed.php" class="btn-rede-social">Rede Social</a>
-        </div>
-        <div class="header-botoes">
-            <button class="foto-perfil" aria-label="Foto de Perfil" onclick="window.location.href='perfil.php'">
-                <img src="img\cog.png" alt="Foto de Perfil" class="icone">
-            </button>
-            <button class="btn-notificacoes" aria-label="Notificações" onclick="window.location.href='notificacoes.php'">
+    <div class="logo">
+        <a href="feed.php" class="btn-rede-social">Rede Social</a>
+    </div>
+    <div class="header-botoes">
+        <button class="foto-perfil" aria-label="Foto de Perfil" onclick="window.location.href='perfil.php'">
+            <img src="img\profile.png" alt="Foto de Perfil" class="icone">
+        </button>
+        <button class="btn-notificacoes" aria-label="Notificações" onclick="window.location.href='lista_notificacoes.php'">
             <img src="img\bell.png" alt="Notificações" class="icone">
-            </button>
-            <button class="btn-deslogar" aria-label="Deslogar" onclick="window.location.href='logout.php'">
-                <img src="img\logout.png" alt="Deslogar" class="icone">
-            </button>
-        </div>
+            <?php if ($notificacoesNaoLidas > 0): ?>
+                <span class="pontinho-vermelho"></span>
+            <?php endif; ?>
+        </button>
+        <button class="btn-deslogar" aria-label="Deslogar" onclick="window.location.href='logout.php'">
+            <img src="img\logout.png" alt="Deslogar" class="icone">
+        </button>
+    </div>
     </header>
 
     <!-- Feed de Posts -->
@@ -165,36 +133,74 @@ $posts = $stmt->fetchAll();
             <!-- Formulário de Publicação -->
             <div class="feed-post-form"> 
                 <form action="feed.php" method="POST" enctype="multipart/form-data">
-                    <textarea name="post_text" placeholder="O que você está pensando?" required></textarea>
-                    <input type="file" name="image">
-                    <button type="submit">Postar</button>
+                    <textarea name="texto" placeholder="O que você está pensando?" required></textarea>
+                    <div class="botao-container">
+                        <input type="file" name="image" id="image">
+                        <button type="submit">Postar</button>
+                    </div>
                 </form>
             </div>
 
             <!-- Lista de Posts -->
-            <div class="feed-posts">
+            <div class="feed">
                 <?php foreach ($posts as $post): ?>
-                    <div class="feed-post"> 
+                    <div class="post"> 
+                        <?php if ($post['id_usuario'] == $id_usuario): ?>
+                            <!-- Ícone de 3 bolinhas para o usuário dono do post -->
+                            <div class="opcoes-post">
+                                <button class="opcoes-btn" onclick="mostrarOpcoes(<?php echo $post['id']; ?>)">...</button>
+                                <div id="opcoes-<?php echo $post['id']; ?>" class="opcoes-menu" style="display: none;">
+                                    <form action="feed.php" method="POST">
+                                        <input type="hidden" name="post_id" value="<?php echo $post['id']; ?>">
+                                        <button type="submit" name="acao" value="deletar">Deletar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <!-- Ícone de 3 bolinhas para posts de outros usuários -->
+                            <div class="opcoes-post">
+                                <button class="opcoes-btn" onclick="mostrarOpcoes(<?php echo $post['id']; ?>)">...</button>
+                                <div id="opcoes-<?php echo $post['id']; ?>" class="opcoes-menu" style="display: none;">
+                                    <form action="feed.php" method="POST">
+                                        <input type="hidden" name="id_usuario_bloqueado" value="<?php echo $post['id_usuario']; ?>">
+                                        <button type="submit" name="acao" value="bloquear">Bloquear Usuário</button>
+                                    </form>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
                         <?php if (!empty($post['imagem'])): ?>
                             <img src="<?php echo htmlspecialchars($post['imagem']); ?>" alt="Post Image">
                         <?php endif; ?>
                         <p><?php echo htmlspecialchars($post['texto']); ?></p>
-                        <small>Postado por <?php echo htmlspecialchars($post['id_usuario']); ?> em <?php echo $post['data_criacao']; ?></small>
+                        <small>
+                            Postado por <a href="perfil.php?id_usuario=<?php echo $post['id_usuario']; ?>"><?php echo htmlspecialchars($post['nome_usuario']); ?></a>
+                            em <?php echo $post['data_criacao']; ?>
+                        </small>
                         <div class="interacao-feed"> 
                             <button>Curtir</button>
-                            <button onclick="openComment(<?php echo $post['id']; ?>)">Comentar</button>
+                            <button onclick="window.location.href='lista_comentarios.php?post_id=<?php echo $post['id']; ?>'">Comentários</button>
                         </div>
                     </div>
                 <?php endforeach; ?>
             </div>
-
         </div>
     </main>
-
     <script>
-        function openComment(id) {
-            alert('Abrir comentários para o post ID: ' + id);
+    function mostrarOpcoes(postId) {
+        var menu = document.getElementById('opcoes-' + postId);
+        // Alterna entre mostrar e esconder as opções
+        if (menu.style.display === "none") {
+            menu.style.display = "block";
+        } else {
+            menu.style.display = "none";
         }
+    }
+    
+    function openComment(id) {
+        alert('Abrir comentários para o post ID: ' + id);
+    }
     </script>
+
 </body>
 </html>

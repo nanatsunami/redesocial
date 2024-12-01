@@ -10,8 +10,13 @@ body {
     padding-top: 60px; /* Ajuste para evitar que o conteúdo seja ocultado pelo cabeçalho fixo */
 }
 
+small {
+    color: #888;
+    font-size: 0.8em;
+}
+
 /* Estilos combinados para containers */
-.container-cadastro, .container-login {
+.container-cadastro, .container-login, .container-redefinir, .container-sucesso, .container-verificacao {
     background-color: white;
     padding: 20px;
     border-radius: 10px;
@@ -23,6 +28,25 @@ body {
     flex-direction: column;
     align-items: center; /* Garantir que os elementos dentro do container fiquem centralizados */
     margin-bottom: 20px;  /* Adicionado espaçamento entre containers */
+}
+
+.botao-cadastro, .botao-login, .botao-redefinir, .botao-voltar {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 10px;
+}
+
+.botao-cadastro:hover, .botao-login:hover, .botao-redefinir:hover, .botao-voltar:hover {
+    background-color: #45a049;
 }
 
 h2 {
@@ -38,6 +62,12 @@ input {
     border-radius: 5px;
     font-size: 16px;
     box-sizing: border-box;
+}
+
+.redefine-senha {
+    text-align: left;
+    font-size: 0.8em;
+    margin: 10px 0;
 }
 
 .signup, .login {
@@ -109,32 +139,9 @@ input {
     flex-grow: 1;  /* Faz o texto ocupar o restante do espaço */
 }
 
-.redefine-senha {
-    text-align: left;
-    font-size: 0.8em;
-    margin: 10px 0;
-}
-
-.botao-cadastro, .botao-login {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 15px 32px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    border-radius: 10px;
-}
-
-.botao-cadastro:hover, .botao-login:hover {
-    background-color: #45a049;
-}
-
-/* Estilos para o cabeçalho fixo */
+/* =========================================================
+                        HEADER PRINCIPAL
+ ===========================================================*/
 .header-fixo {
     position: fixed;
     top: 0;
@@ -179,13 +186,51 @@ input {
     flex-grow: 0;
 }
 
-/* Tamanho dos ícones */
-.icone {
-    width: 25px;
-    height: 25px;
+/* Botão de notificações */
+.btn-notificacoes {
+    /* Adiciona mais espaço se necessário, para que o ícone não fique comprimido */
+    padding: 8px 12px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Feed */
+/* Tamanho dos ícones */
+.icone {
+    width: 25px; /* Tamanho fixo para o ícone */
+    height: 25px; /* Mantém o ícone proporcional */
+}
+
+/* Adicionando um efeito visual para quando o botão é clicado */
+.btn-notificacoes:active {
+    opacity: 0.7;
+}
+
+/* Estilo adicional para o ícone, se necessário */
+.btn-notificacoes img.icone {
+    transition: transform 0.3s ease;
+}
+
+.btn-notificacoes:hover img.icone {
+    transform: scale(1.1); /* Aumenta um pouco o ícone ao passar o mouse */
+}
+
+/* Ponto vermelho na notificação */
+.pontinho-vermelho {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+
+/* ========================================================
+                            FEED
+===========================================================*/
 .main-feed {
     margin-top: 80px;  /* Ajustado para que o conteúdo não fique oculto atrás do cabeçalho */
     padding: 20px;
@@ -202,11 +247,39 @@ input {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     padding-bottom: 20px; /* Garante que o feed tenha um pouco de espaçamento na parte inferior */
 }
+
+.feed-post-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Adiciona um pequeno espaço entre o textarea e os botões */
 }
 
-.feed-post-form {
-    margin-bottom: 20px;
+.botao-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px; /* Espaçamento entre os botões */
 }
+
+input[type="file"] {
+    flex-grow: 1;  /* Faz com que o botão de anexar ocupe o maior espaço possível */
+    max-width: 200px; /* Limita a largura do botão de anexar, se necessário */
+}
+
+button[type="submit"] {
+    background-color: #4CAF50; /* Cor verde similar aos outros botões */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px; /* Ajuste de tamanho de texto */
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover {
+    background-color: #45a049; /* Cor mais escura quando passar o mouse */
+}
+
 
 .feed-post-form textarea {
     width: 100%;
@@ -222,100 +295,11 @@ input {
     margin-bottom: 10px;
 }
 
-.feed-posts .feed-post {
-    background-color: #fff;
-    margin-bottom: 30px;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.feed-post img {
+.post img {
     width: 100%;
     max-height: 400px;
     object-fit: cover;
     margin-bottom: 10px;
-}
-
-/* Interações do Feed */
-.interacao-feed {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-start;
-}
-
-.interacao-feed button {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 14px;
-    margin: 4px 2px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    border-radius: 5px;
-}
-
-.interacao-feed button:hover {
-    background-color: #45a049;
-}
-
-/* Media Queries para Responsividade */
-@media (max-width: 600px) {
-    .header-botoes {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .icone {
-        width: 20px;
-        height: 20px;
-    }
-
-    .feed-post-form textarea {
-        height: 80px;
-    }
-}
-
-/* Foto de Perfil no perfil */
-.foto-perfil-container {
-    width: 150px;
-    height: 150px;
-    margin-bottom: 20px;
-    overflow: hidden;
-    border-radius: 50%;
-    border: 3px solid #ddd;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.foto-perfil {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* Nome do usuário */
-.nome-usuario {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 20px;
-}
-
-/* Caixa do perfil */
-.container-perfil {
-    background-color: white;
-    padding: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    max-width: 600px;
-    width: 100%;
-    margin: 0 auto;
-    text-align: center;
 }
 
 /* Posts */
@@ -374,6 +358,197 @@ input {
     background-color: #45a049;
 }
 
+/* Feed */
+.feed {
+    margin-top: 20px;
+}
+
+.feed .post {
+    background-color: #fff;
+    margin-bottom: 30px;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative;  /* Isso é importante para que o botão de 3 pontos seja posicionado em relação ao post */
+}
+
+/* Adicionando regras específicas para a posição do botão de 3 pontinhos */
+.opcoes-post {
+    position: absolute;  /* Faz com que o botão flutue sobre o post */
+    top: 10px;           /* Distância do topo do post */
+    right: 10px;         /* Distância da borda direita */
+    z-index: 10;         /* Assegura que o botão esteja acima de outros elementos */
+}
+
+.opcoes-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #333;
+}
+
+/* Remover o fundo e borda do quadrado, deixando apenas o botão */
+.opcoes-menu {
+    position: absolute;
+    top: 20px;        /* Distância para baixo a partir do botão de 3 pontinhos */
+    right: 0;         /* Alinhado à direita */
+    display: none;    /* Inicialmente escondido */
+}
+
+/* Botão de deletar */
+.btn-deletar {
+    background-color: #f44336; /* Cor vermelha */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.interacao-feed {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+}
+
+.interacao-feed button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 4px 2px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 5px;
+}
+
+.interacao-feed button:hover {
+    background-color: #45a049;
+}
+
+/* Estilo das opções para os comentários */
+.opcoes-comentario {
+    position: absolute;  /* Faz o botão flutuar sobre o comentário */
+    top: 10px;           /* Distância do topo do comentário */
+    right: 10px;         /* Distância da borda direita */
+    z-index: 10;         /* Assegura que o botão fique acima de outros elementos */
+}
+
+.opcoes-comentario .opcoes-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #333;
+}
+
+/* Menu de opções do comentário (inicialmente escondido) */
+.opcoes-comentario .opcoes-menu {
+    position: absolute;
+    top: 20px;           /* Distância para baixo a partir do botão de 3 pontinhos */
+    right: 0;            /* Alinhado à direita */
+    display: none;       /* Inicialmente escondido */
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 5px;
+    border-radius: 5px;
+    z-index: 10;
+}
+
+/* Botão de deletar no menu de opções do comentário */
+.opcoes-comentario .btn-deletar {
+    background-color: #f44336; /* Cor vermelha */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+/* Estilo para os botões de interação nos comentários */
+.interacao-comentario button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 4px 2px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 5px;
+}
+
+.interacao-comentario button:hover {
+    background-color: #45a049;
+}
+
+/* Media Queries para Responsividade */
+@media (max-width: 600px) {
+    .header-botoes {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .icone {
+        width: 20px;
+        height: 20px;
+    }
+
+    .feed-post-form textarea {
+        height: 80px;
+    }
+}
+
+/* =========================================================
+                            PERFIL
+============================================================*/
+.foto-perfil-container {
+    width: 150px;
+    height: 150px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    border-radius: 50%;
+    border: 3px solid #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.foto-perfil {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Nome do usuário */
+.nome-usuario {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Caixa do perfil */
+.container-perfil {
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+}
+
 /* Fundo */
 .background {
     background-color: #f5f8fa;
@@ -385,18 +560,604 @@ input {
     z-index: -1;
 }
 
-/* NOTIFICAÇÕES */
-.container-notificacoes {
-    padding: 20px;
+/*==============================================================
+                            TEMAS                               
+==============================================================*/
+/* Tema Claro */
+.theme-light {
+    background-color: #f5f8fa; /* Fundo claro */
+    color: #333; /* Texto escuro */
+}
+
+.theme-light .header-fixo {
+    background-color: #333; /* Header escuro */
+    color: white; /* Texto branco */
+}
+
+.theme-light .header-notificacoes h1 {
+    font-size: 24px;
+    margin: 0;
+    color: white;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.theme-light .secao-notificacoes li, .secao-comentarios li, .secao-curtidas li, .secao-post li {
+    padding: 10px;
+    background-color: #e0e0e0; /* Fundo claro para listas */
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.theme-light .container-feed {
+    width: 100%;
+    max-width: 800px;
+    background-color: white; /* Fundo branco para o feed */
+    padding: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.theme-light button[type="submit"] {
+    background-color: #4CAF50; /* Verde padrão */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.theme-light button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.theme-light .post {
     background-color: #fff;
+    margin-bottom: 30px;
+    padding: 20px;
+    border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.container-notificacoes h2 {
+/* Tema Escuro */
+.theme-dark {
+    background-color: #121212; /* Fundo escuro */
+    color: #e0e0e0; /* Texto claro */
+}
+
+.theme-dark .header-fixo {
+    background-color: #1f1f1f; /* Header escuro */
+    color: white;
+}
+
+.theme-dark .header-notificacoes h1 {
+    font-size: 24px;
+    margin: 0;
+    color: white;
     text-align: center;
+    flex-shrink: 0;
+}
+
+.theme-dark .secao-notificacoes li, .secao-comentarios li, .secao-curtidas li, .secao-post li {
+    padding: 10px;
+    background-color: #333; /* Fundo escuro para listas */
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.theme-dark .container-feed {
+    width: 100%;
+    max-width: 800px;
+    background-color: #1e1e1e; /* Fundo mais escuro para o feed */
+    padding: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.theme-dark button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.theme-dark button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.theme-dark .post {
+    background-color: #333; /* Fundo escuro para os posts */
+    margin-bottom: 30px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Tema Midnight */
+.theme-midnight {
+    background-color: #2a1a1a; /* Fundo escuro com toques rosados */
+    color: #ffcccc; /* Texto suave e claro */
+}
+
+.theme-midnight .header-fixo {
+    background-color: #800000; /* Vermelho escuro para o header */
+    color: white;
+}
+
+.theme-midnight .header-notificacoes h1 {
+    font-size: 24px;
+    margin: 0;
+    color: white;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.theme-midnight .secao-notificacoes li, .secao-comentarios li, .secao-curtidas li, .secao-post li {
+    padding: 10px;
+    background-color: #3c1a1a; /* Fundo mais suave para listas */
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.theme-midnight .container-feed {
+    width: 100%;
+    max-width: 800px;
+    background-color: #3c1a1a; /* Fundo similar ao background geral */
+    padding: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.theme-midnight button[type="submit"] {
+    background-color: #4CAF50; /* Verde padrão */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.theme-midnight button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.theme-midnight .post {
+    background-color: #3c1a1a; /* Fundo para o post com tom mais quente */
+    margin-bottom: 30px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* =========================================================
+                        HEADER PRINCIPAL
+ ===========================================================*/
+.header-fixo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #333;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    z-index: 100;
+    box-sizing: border-box;
+}
+
+/* Logo */
+.header-fixo .logo a {
+    color: white;
+    text-decoration: none;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* Contêiner de botões na header */
+.header-botoes {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 20px;
+    width: auto;
+    max-width: 60%;
+}
+
+/* Botões de ícones */
+.header-botoes button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    flex-grow: 0;
+}
+
+/* Botão de notificações */
+.btn-notificacoes {
+    /* Adiciona mais espaço se necessário, para que o ícone não fique comprimido */
+    padding: 8px 12px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Tamanho dos ícones */
+.icone {
+    width: 25px; /* Tamanho fixo para o ícone */
+    height: 25px; /* Mantém o ícone proporcional */
+}
+
+/* Adicionando um efeito visual para quando o botão é clicado */
+.btn-notificacoes:active {
+    opacity: 0.7;
+}
+
+/* Estilo adicional para o ícone, se necessário */
+.btn-notificacoes img.icone {
+    transition: transform 0.3s ease;
+}
+
+.btn-notificacoes:hover img.icone {
+    transform: scale(1.1); /* Aumenta um pouco o ícone ao passar o mouse */
+}
+
+/* Ponto vermelho na notificação */
+.pontinho-vermelho {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+
+/* ========================================================
+                            FEED
+===========================================================*/
+.main-feed {
+    margin-top: 80px;  /* Ajustado para que o conteúdo não fique oculto atrás do cabeçalho */
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.container-feed {
+    width: 100%;
+    max-width: 800px;
+    background-color: white;
+    padding: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding-bottom: 20px; /* Garante que o feed tenha um pouco de espaçamento na parte inferior */
+}
+
+.feed-post-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Adiciona um pequeno espaço entre o textarea e os botões */
+}
+
+.botao-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px; /* Espaçamento entre os botões */
+}
+
+input[type="file"] {
+    flex-grow: 1;  /* Faz com que o botão de anexar ocupe o maior espaço possível */
+    max-width: 200px; /* Limita a largura do botão de anexar, se necessário */
+}
+
+button[type="submit"] {
+    background-color: #4CAF50; /* Cor verde similar aos outros botões */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px; /* Ajuste de tamanho de texto */
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+button[type="submit"]:hover {
+    background-color: #45a049; /* Cor mais escura quando passar o mouse */
+}
+
+
+.feed-post-form textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.feed-post-form input {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
+.post img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+/* Posts */
+.posts-container {
+    margin-top: 20px;
+}
+
+.post {
+    background-color: #fff;
+    margin-bottom: 30px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.post-photo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.post-content img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.post-acoes {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-start;
+    margin-top: 10px;
+}
+
+.post-acoes button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.post-acoes button:hover {
+    background-color: #45a049;
+}
+
+/* Feed */
+.feed {
+    margin-top: 20px;
+}
+
+.feed .post {
+    background-color: #fff;
+    margin-bottom: 30px;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative;  /* Isso é importante para que o botão de 3 pontos seja posicionado em relação ao post */
+}
+
+/* Adicionando regras específicas para a posição do botão de 3 pontinhos */
+.opcoes-post {
+    position: absolute;  /* Faz com que o botão flutue sobre o post */
+    top: 10px;           /* Distância do topo do post */
+    right: 10px;         /* Distância da borda direita */
+    z-index: 10;         /* Assegura que o botão esteja acima de outros elementos */
+}
+
+.opcoes-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
     color: #333;
 }
 
+/* Remover o fundo e borda do quadrado, deixando apenas o botão */
+.opcoes-menu {
+    position: absolute;
+    top: 20px;        /* Distância para baixo a partir do botão de 3 pontinhos */
+    right: 0;         /* Alinhado à direita */
+    display: none;    /* Inicialmente escondido */
+}
+
+/* Botão de deletar */
+.btn-deletar {
+    background-color: #f44336; /* Cor vermelha */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.interacao-feed {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+}
+
+.interacao-feed button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 4px 2px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 5px;
+}
+
+.interacao-feed button:hover {
+    background-color: #45a049;
+}
+
+/* Estilo das opções para os comentários */
+.opcoes-comentario {
+    position: absolute;  /* Faz o botão flutuar sobre o comentário */
+    top: 10px;           /* Distância do topo do comentário */
+    right: 10px;         /* Distância da borda direita */
+    z-index: 10;         /* Assegura que o botão fique acima de outros elementos */
+}
+
+.opcoes-comentario .opcoes-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #333;
+}
+
+/* Menu de opções do comentário (inicialmente escondido) */
+.opcoes-comentario .opcoes-menu {
+    position: absolute;
+    top: 20px;           /* Distância para baixo a partir do botão de 3 pontinhos */
+    right: 0;            /* Alinhado à direita */
+    display: none;       /* Inicialmente escondido */
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 5px;
+    border-radius: 5px;
+    z-index: 10;
+}
+
+/* Botão de deletar no menu de opções do comentário */
+.opcoes-comentario .btn-deletar {
+    background-color: #f44336; /* Cor vermelha */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+/* Estilo para os botões de interação nos comentários */
+.interacao-comentario button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 4px 2px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 5px;
+}
+
+.interacao-comentario button:hover {
+    background-color: #45a049;
+}
+
+/* Media Queries para Responsividade */
+@media (max-width: 600px) {
+    .header-botoes {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .icone {
+        width: 20px;
+        height: 20px;
+    }
+
+    .feed-post-form textarea {
+        height: 80px;
+    }
+}
+
+/* =========================================================
+                            PERFIL
+============================================================*/
+.foto-perfil-container {
+    width: 150px;
+    height: 150px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    border-radius: 50%;
+    border: 3px solid #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.foto-perfil {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Nome do usuário */
+.nome-usuario {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Caixa do perfil */
+.container-perfil {
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+}
+
+/* Fundo */
+.background {
+    background-color: #f5f8fa;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+}
+
+/* =============================================================
+                        NOTIFICAÇÕES 
+=============================================================*/
 .secao-notificacoes, .secao-comentarios, .secao-curtidas, .secao-post {
     margin-bottom: 20px;
 }
@@ -413,11 +1174,104 @@ input {
     border-radius: 8px;
 }
 
-small {
-    color: #888;
-    font-size: 0.8em;
+/* CONFIGURA_NOTIFICAÇÕES */
+/* Estilo para o contêiner do título e botão de configurações */
+.header-notificacoes {
+    width: 100%;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 20px;
+    box-sizing: border-box;  /* Garantir que o padding não afete o layout */
 }
 
+/* O título h1 dentro da header-notificacoes */
+.header-notificacoes h1 {
+    font-size: 24px;  /* Tamanho de fonte adequado */
+    margin: 0;
+    color: black;  /* Cor do título */
+    text-align: center;  /* Centraliza o título */
+    flex-shrink: 0;  /* Impede que o título encolha */
+}
+
+/* Estilo para o botão de configurações */
+.btn-configuracoes-notif {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;  /* Animação de transição */
+}
+
+/* Para garantir que o título e o botão fiquem alinhados lado a lado, centralizados */
+.header-notificacoes > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;  /* Espaço entre o título e o botão */
+    width: auto;  /* Não faz os itens ocuparem toda a largura */
+}
+
+/* Media Queries para garantir que o layout fique bom em telas menores */
+@media (max-width: 600px) {
+    .header-notificacoes {
+        flex-direction: column;  /* Coloca o título e o botão em coluna em telas menores */
+        align-items: center;  /* Centraliza o conteúdo */
+    }
+
+    .btn-configuracoes-notif {
+        margin-top: 10px;  /* Espaçamento entre o título e o botão */
+    }
+}
+
+/* Estilo para a label contendo o checkbox */
+.checkbox-container {
+    position: relative;  /* Permite o posicionamento absoluto do input */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;  /* Coloca o checkbox à direita */
+    gap: 10px;  /* Espaço entre o checkbox e o texto */
+    margin-bottom: 15px;  /* Espaço entre os itens */
+}
+
+/* Estilo para o checkbox */
+.checkbox-container input {
+    position: absolute;  /* Posiciona o checkbox na frente do texto */
+    left: 0;
+    z-index: 1;  /* Garante que o checkbox fique na frente */
+}
+
+/* Estilo para o texto */
+.checkbox-container span {
+    position: relative;  /* O texto ficará atrás do checkbox */
+    z-index: 0;  /* O texto ficará atrás do checkbox */
+}
+
+
+
+
+/* =============================================================
+                        NOTIFICAÇÕES 
+=============================================================*/
+.secao-notificacoes, .secao-comentarios, .secao-curtidas, .secao-post {
+    margin-bottom: 20px;
+}
+
+.secao-notificacoes ul, .secao-comentarios ul, .secao-curtidas ul, .secao-post ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.secao-notificacoes li, .secao-comentarios li, .secao-curtidas li, .secao-post li {
+    padding: 10px;
+    background-color: #f4f4f4;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
 
 /* CONFIGURA_NOTIFICAÇÕES */
 /* Estilo para o contêiner do título e botão de configurações */

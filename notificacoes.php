@@ -1,18 +1,40 @@
 <?php
-// Inicia a sessão para obter o ID do usuário logado
-session_start();
+function obterPreferenciasNotificacoes($pdo, $id_usuario) {
+    $queryGlobais = "SELECT notificacao_comentarios_globais, notificacao_curtidas_globais FROM config_notificacoes WHERE id_usuario = :id_usuario";
+    $stmtGlobais = $pdo->prepare($queryGlobais);
+    $stmtGlobais->bindParam(':id_usuario', $id_usuario);
+    $stmtGlobais->execute();
+    $preferenciasGlobais = $stmtGlobais->fetch(PDO::FETCH_ASSOC);
 
-// Verifica se o usuário está logado
-if (!isset($_SESSION['id_usuario'])) {
-    header('Location: index.php'); // Redireciona para a página de login, caso não esteja logado
-    exit;
+    // Define preferências padrão caso não existam
+    if ($preferenciasGlobais === false) {
+        $preferenciasGlobais = [
+            'notificacao_comentarios_globais' => 1,
+            'notificacao_curtidas_globais' => 1
+        ];
+    }
+    return $preferenciasGlobais;
 }
 
-// ID do usuário logado
-$id_usuario = $_SESSION['id_usuario']; 
+// Função para atualizar as preferências de notificações
+function atualizarPreferenciasNotificacoes($pdo, $id_usuario, $notificacao_comentarios_globais, $notificacao_curtidas_globais) {
+    $query = "UPDATE config_notificacoes SET 
+              notificacao_comentarios_globais = ?, 
+              notificacao_curtidas_globais = ? 
+              WHERE id_usuario = ?";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([$notificacao_comentarios_globais, $notificacao_curtidas_globais, $id_usuario]);
 
-// Conexão com o banco de dados
-include 'db.php';
+    return $stmt->rowCount(); // Retorna o número de linhas afetadas
+}
+
+// Função para marcar notificações como lidas
+function marcarNotificacoesComoLidas($pdo, $id_usuario) {
+    $query = "UPDATE notificacoes SET lida = 1 WHERE id_usuario = :id_usuario AND lida = 0";
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':id_usuario', $id_usuario, PDO::PARAM_INT);
+    $stmt->execute();
+}
 
 // Função para buscar notificações de comentários
 function getNotificacoesComentarios($pdo, $id_usuario) {
@@ -38,83 +60,25 @@ function getNotificacoesCurtidas($pdo, $id_usuario) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// Recupera as notificações de comentários e curtidas
-$comentarios = getNotificacoesComentarios($pdo, $id_usuario);
-$curtidas = getNotificacoesCurtidas($pdo, $id_usuario);
+function contarNotificacoesNaoLidas($pdo, $id_usuario) {
+    $queryNotificacoesNaoLidas = "SELECT COUNT(*) FROM notificacoes WHERE id_usuario = :id_usuario AND lida = 0";
+    $stmtNotificacoesNaoLidas = $pdo->prepare($queryNotificacoesNaoLidas);
+    $stmtNotificacoesNaoLidas->bindParam(':id_usuario', $id_usuario);
+    $stmtNotificacoesNaoLidas->execute();
+    return $stmtNotificacoesNaoLidas->fetchColumn();
+}
+
+function carregarNotificacoes($pdo, $id_usuario) {
+    $query = "SELECT n.*, 
+                     u.nome_usuario AS nome_usuario_origem
+              FROM notificacoes n
+              JOIN usuarios u ON n.id_usuario = u.id
+              WHERE n.id_usuario_destinatario = :id_usuario
+              ORDER BY n.data_criacao DESC";
+    $stmt = $pdo->prepare($query);
+    $stmt->bindParam(':id_usuario', $id_usuario);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 ?>
-
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notificações</title>
-    <link rel="stylesheet" href="css\style.css"> 
-</head>
-<body>
-
-    <!-- Cabeçalho fixo -->
-    <header class="header-fixo">
-        <div class="logo">
-            <a href="feed.php" class="btn-rede-social">Rede Social</a>
-        </div>
-        <div class="header-botoes">
-            <button class="foto-perfil" aria-label="Foto de Perfil" onclick="window.location.href='perfil.php'">
-                <img src="img\cog.png" alt="Foto de Perfil" class="icone">
-            </button>
-            <button class="btn-notificacoes" aria-label="Notificações" onclick="window.location.href='notificacoes.php'">
-            <img src="img\bell.png" alt="Notificações" class="icone">
-            </button>
-            <button class="btn-deslogar" aria-label="Deslogar" onclick="window.location.href='logout.php'">
-                <img src="img\logout.png" alt="Deslogar" class="icone">
-            </button>
-        </div>
-    </header>
-
-    <!-- Título da Página -->
-    <div class="header-notificacoes">
-        <h1>Notificações</h1>
-        <!-- Botão para as configurações -->
-        <button class="btn-configuracoes-notif" aria-label="Configurações de Notificação" onclick="window.location.href='configura_notificacoes.php'">
-            <img src="img/cog.png" alt="Configurações" class="icone">
-        </button>
-    </div>
-
-    <div class="container-feed">
-        <!-- Seção de Comentários -->
-        <section id="comentarios">
-            <h2>Comentários</h2>
-            <?php if (count($comentarios) > 0): ?>
-                <ul>
-                    <?php foreach ($comentarios as $notificacao): ?>
-                        <li>
-                            <p><strong><?php echo htmlspecialchars($notificacao['mensagem']); ?></strong></p>
-                            <p>Data: <?php echo date('d/m/Y H:i:s', strtotime($notificacao['data_criacao'])); ?></p>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            <?php else: ?>
-                <p>Você não tem notificações de comentários no momento.</p>
-            <?php endif; ?>
-        </section>
-
-        <!-- Seção de Curtidas -->
-        <section id="curtidas">
-            <h2>Curtidas</h2>
-            <?php if (count($curtidas) > 0): ?>
-                <ul>
-                    <?php foreach ($curtidas as $notificacao): ?>
-                        <li>
-                            <p><strong><?php echo htmlspecialchars($notificacao['mensagem']); ?></strong></p>
-                            <p>Data: <?php echo date('d/m/Y H:i:s', strtotime($notificacao['data_criacao'])); ?></p>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            <?php else: ?>
-                <p>Você não tem notificações de curtidas no momento.</p>
-            <?php endif; ?>
-        </section>
-    </div>
-
-</body>
-</html>

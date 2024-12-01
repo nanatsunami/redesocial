@@ -1,8 +1,9 @@
 <?php
 session_start();
 
-// Incluindo o arquivo de conexão com o banco de dados (PDO)
+// Incluindo o arquivo de conexão com o banco de dados (PDO) e as configurações de notificação
 include('db.php');
+include('notificacoes.php');
 
 // Verifica se o usuário está logado
 if (!isset($_SESSION['id_usuario'])) {
@@ -15,43 +16,29 @@ $id_usuario = $_SESSION['id_usuario'];
 // Inicializa a variável de erro
 $erro = "";
 
+// Recupera as preferências de notificações do banco de dados
+$preferencias = obterPreferenciasNotificacoes($pdo, $id_usuario);
+
+// Obter o número de notificações não lidas
+$notificacoesNaoLidas = contarNotificacoesNaoLidas($pdo, $id_usuario);
+
 // Verifica se o formulário foi enviado para atualizar as preferências
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $notificacao_comentarios_globais = isset($_POST['notificacao_comentarios_globais']) ? 1 : 0;
     $notificacao_curtidas_globais = isset($_POST['notificacao_curtidas_globais']) ? 1 : 0;
 
     // Atualiza as preferências de notificações
-    $query = "UPDATE config_notificacoes SET 
-              notificacao_comentarios_globais = ?, 
-              notificacao_curtidas_globais = ? 
-              WHERE id_usuario = ?";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute([$notificacao_comentarios_globais, $notificacao_curtidas_globais, $id_usuario]);
+    $linhasAfetadas = atualizarPreferenciasNotificacoes($pdo, $id_usuario, $notificacao_comentarios_globais, $notificacao_curtidas_globais);
 
     // Verifica se a atualização foi bem-sucedida
-    if ($stmt->rowCount() > 0) {
+    if ($linhasAfetadas > 0) {
         $sucesso = "Preferências de notificação atualizadas com sucesso!";
     } else {
         $erro = "Falha ao atualizar as preferências de notificação.";
     }
-
-}
-
-// Recupera as preferências de notificações do banco de dados
-$query = "SELECT * FROM config_notificacoes WHERE id_usuario = ?";
-$stmt = $pdo->prepare($query);
-$stmt->execute([$id_usuario]);
-$preferencias = $stmt->fetch(PDO::FETCH_ASSOC);
-
-// Se não encontrar as preferências, cria as preferências padrão
-if (!$preferencias) {
-    $query = "INSERT INTO config_notificacoes (id_usuario, notificacao_comentarios_globais, notificacao_curtidas_globais)
-              VALUES (?, 1, 1)";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute([$id_usuario]);
-    $preferencias = ['notificacao_comentarios_globais' => 1, 'notificacao_curtidas_globais' => 1];
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -69,10 +56,13 @@ if (!$preferencias) {
         </div>
         <div class="header-botoes">
             <button class="foto-perfil" aria-label="Foto de Perfil" onclick="window.location.href='perfil.php'">
-                <img src="img\cog.png" alt="Foto de Perfil" class="icone">
+                <img src="img\profile.png" alt="Foto de Perfil" class="icone">
             </button>
-            <button class="btn-notificacoes" aria-label="Notificações" onclick="window.location.href='notificacoes.php'">
+            <button class="btn-notificacoes" aria-label="Notificações" onclick="window.location.href='lista_notificacoes.php'">
                 <img src="img\bell.png" alt="Notificações" class="icone">
+                <?php if ($notificacoesNaoLidas > 0): ?>
+                    <span class="pontinho-vermelho"></span>
+                <?php endif; ?>
             </button>
             <button class="btn-deslogar" aria-label="Deslogar" onclick="window.location.href='logout.php'">
                 <img src="img\logout.png" alt="Deslogar" class="icone">

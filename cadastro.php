@@ -1,16 +1,6 @@
 <?php
-// Conexão com o banco de dados
-$host = 'localhost';
-$db = 'rede_social';
-$user = 'admin';
-$pass = 'senha';
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Erro na conexão: " . $e->getMessage());
-}
+// Incluir arquivo de conexão com o banco de dados
+require 'db.php';
 
 // Inicializa a variável de erro
 $erro = "";
@@ -54,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $id_usuario = $pdo->lastInsertId();
 
                     // Insere as preferências de notificações para esse usuário (tudo ativado por padrão)
-                    $queryPreferencias = "INSERT INTO preferencias_notificacoes (id_usuario, notificacao_comentarios_globais, notificacao_curtidas_globais)
+                    $queryPreferencias = "INSERT INTO config_notificacoes (id_usuario, notificacao_comentarios_globais, notificacao_curtidas_globais)
                                           VALUES (:id_usuario, 1, 1)"; // 1 significa que as notificações estão ativadas
                     $stmtPreferencias = $pdo->prepare($queryPreferencias);
                     $stmtPreferencias->bindParam(':id_usuario', $id_usuario);
@@ -70,11 +60,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                     // Verifica se a atualização foi bem-sucedida
                     if ($stmt->rowCount() > 0) {
-                        // Envia um email com o token de verificação
+                        // Define a URL de verificação com o token como parâmetro
+                        $urlVerificacao = "http://localhost/ProjetoRedeSocial/verifica_cadastro.php?token=" . $token;
+
+                        // Envia um e-mail com o link de verificação
                         require 'envia_email.php'; // Inclua o arquivo de envio de e-mail
-                        if (sendVerificationEmail($email, $token)) {
+                        if (sendVerificationEmail($email, $urlVerificacao)) {
                             // Redireciona para a página de sucesso
-                            header('Location: sucesso.php');
+                            header('Location: sucesso_cadastro.php');
                             exit();
                         } else {
                             $erro = "Falha ao enviar o e-mail de verificação.";
@@ -82,8 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     } else {
                         $erro = "Falha ao atualizar o token de verificação.";
                     }
-                } else {
-                    $erro = "Falha ao cadastrar o usuário.";
+
                 }
             }
         }

@@ -18,16 +18,22 @@ function sendVerificationEmail($email, $token) {
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
 
+        // Definir a codificação do email para UTF-8
+        $mail->CharSet = 'UTF-8';  // Adicione esta linha
+
         // Remetente e destinatário
         $mail->setFrom('projetoredesocial9@gmail.com', 'Projeto Rede Social');
         $mail->addAddress($email); // Adicionar o e-mail do usuário
 
-        // Conteúdo do e-mail
-        $mail->isHTML(true);
-        $mail->Subject = 'Verificação de Cadastro';
-        $mail->Body    = 'Obrigado por se cadastrar!<br>Seu token de verificação é: <b>' . $token . '</b>';
-        $mail->AltBody = 'Obrigado por se cadastrar! Seu token de verificação é: ' . $token;
+        // Definir a URL de verificação com o token como parâmetro
+        // Aqui estamos apenas passando o valor do token, não a URL completa
+        $urlVerificacao = "http://localhost/ProjetoRedeSocial/verifica_cadastro.php?token=" . $token;
 
+        // O corpo do email
+        $mail->Body    = 'Obrigado por se cadastrar!<br>Para completar o seu cadastro, clique no link abaixo para verificar sua conta:<br><a href="' . $urlVerificacao . '">Clique aqui para verificar sua conta</a>';
+        $mail->AltBody = 'Obrigado por se cadastrar! Para completar o seu cadastro, copie e cole o seguinte link no seu navegador: ' . $urlVerificacao;
+
+        // Envia o e-mail
         $mail->send();
         return true; // E-mail enviado com sucesso
     } catch (Exception $e) {
@@ -36,6 +42,7 @@ function sendVerificationEmail($email, $token) {
         return false; // E-mail não pôde ser enviado
     }
 }
+
 
 function sendPasswordResetEmail($email, $token) {
     $mail = new PHPMailer(true);
@@ -50,16 +57,24 @@ function sendPasswordResetEmail($email, $token) {
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
 
+        // Definir a codificação do email para UTF-8
+        $mail->CharSet = 'UTF-8';  // Adicione esta linha
+
         // Remetente e destinatário
         $mail->setFrom('projetoredesocial9@gmail.com', 'Projeto Rede Social');
         $mail->addAddress($email); // Adicionar o e-mail do usuário
 
+        // Define a URL de redefinição de senha com o token
+        $urlRedefinicao = "http://localhost/ProjetoRedeSocial/redefine_senha.php?token=" . $token;
+
+
         // Conteúdo do e-mail
         $mail->isHTML(true);
         $mail->Subject = 'Redefinição de Senha';
-        $mail->Body    = 'Você solicitou a redefinição de sua senha.<br>Para redefinir sua senha, clique no seguinte link: <a href="https://seusite.com/redefinir_senha.php?token=' . $token . '">Redefinir Senha</a>';
-        $mail->AltBody = 'Você solicitou a redefinição de sua senha. Para redefinir sua senha, copie e cole o seguinte link no seu navegador: https://seusite.com/redefinir_senha.php?token=' . $token;
+        $mail->Body    = 'Você solicitou a redefinição de sua senha.<br>Para redefinir sua senha, clique no link abaixo:<br><a href="' . $urlRedefinicao . '">Clique aqui para redefinir sua senha</a>';
+        $mail->AltBody = 'Você solicitou a redefinição de sua senha. Para redefinir sua senha, copie e cole o seguinte link no seu navegador: ' . $urlRedefinicao;
 
+        // Envia o e-mail
         $mail->send();
         return true; // E-mail enviado com sucesso
     } catch (Exception $e) {
