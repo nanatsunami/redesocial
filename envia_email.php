@@ -14,7 +14,7 @@ function sendVerificationEmail($email, $token) {
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
         $mail->Username   = 'projetoredesocial9@gmail.com';
-        $mail->Password   = 'bwsr sgzd orwe dfqs';
+        $mail->Password   = '';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
 
@@ -53,7 +53,7 @@ function sendPasswordResetEmail($email, $token) {
         $mail->Host       = 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
         $mail->Username   = 'projetoredesocial9@gmail.com';
-        $mail->Password   = 'bwsr sgzd orwe dfqs';
+        $mail->Password   = '';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
 
